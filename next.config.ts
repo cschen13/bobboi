@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
     config.externals = [...(config.externals || []), { bufferutil: "bufferutil", "utf-8-validate": "utf-8-validate" }];
     return config;
   },
+  // Enable WebSocket support
+  async rewrites() {
+    return [
+      {
+        source: '/api/socket',
+        destination: '/api/socket',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
