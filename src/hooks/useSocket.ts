@@ -1,16 +1,30 @@
 import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Game } from '../lib/types';
+import { saveGameSession } from '../lib/socketUtils';
 
 type PlayerJoinedEvent = {
   game: Game;
   playerName: string;
+  playerId: string;
 };
 
 type PlayerLeftEvent = {
   game: Game;
   playerId: string;
   playerName: string | undefined;
+};
+
+type GameCreatedEvent = {
+  game: Game;
+  playerId: string;
+  gameId: string;
+};
+
+type GameJoinedEvent = {
+  game: Game;
+  playerId: string;
+  gameId: string;
 };
 
 type SocketHookReturn = {
@@ -24,6 +38,8 @@ type SocketHookReturn = {
   reconnectGame: (gameId: string, playerId: string) => void;
   getAllGames: () => Promise<{ games: Game[], count: number }>;
   game: Game | null;
+  playerId: string | null;
+  gameId: string | null;
   error: string | null;
 };
 
@@ -31,6 +47,8 @@ export const useSocket = (): SocketHookReturn => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
   const [game, setGame] = useState<Game | null>(null);
+  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [gameId, setGameId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize socket connection
@@ -59,10 +77,26 @@ export const useSocket = (): SocketHookReturn => {
       setError(data.message);
     });
 
-    socketInstance.on('game_created', (gameData: Game) => {
-      console.log('Game created:', gameData);
-      setGame(gameData);
+    socketInstance.on('game_created', (data: GameCreatedEvent) => {
+      console.log('Game created:', data);
+      setGame(data.game);
+      setPlayerId(data.playerId);
+      setGameId(data.gameId);
       setError(null);
+      
+      // Save session information to local storage
+      saveGameSession(data.gameId, data.playerId, data.game.players.find(p => p.id === data.playerId)?.name || '');
+    });
+    
+    socketInstance.on('game_joined', (data: GameJoinedEvent) => {
+      console.log('Game joined:', data);
+      setGame(data.game);
+      setPlayerId(data.playerId);
+      setGameId(data.gameId);
+      setError(null);
+      
+      // Save session information to local storage
+      saveGameSession(data.gameId, data.playerId, data.game.players.find(p => p.id === data.playerId)?.name || '');
     });
     
     socketInstance.on('game_state', (gameData: Game) => {
@@ -92,6 +126,8 @@ export const useSocket = (): SocketHookReturn => {
     socketInstance.on('game_ended', ({ gameId }: { gameId: string }) => {
       console.log(`Game ended: ${gameId}`);
       setGame(null);
+      setGameId(null);
+      setPlayerId(null);
       setError(null);
     });
 
@@ -126,6 +162,9 @@ export const useSocket = (): SocketHookReturn => {
   const leaveGame = useCallback((gameId: string, playerId: string) => {
     if (socket && connected) {
       socket.emit('leave_game', { gameId, playerId });
+      setGame(null);
+      setGameId(null);
+      setPlayerId(null);
     } else {
       setError('Socket not connected');
     }
@@ -144,6 +183,18 @@ export const useSocket = (): SocketHookReturn => {
   const endGame = useCallback((gameId: string) => {
     if (socket && connected) {
       socket.emit('end_game', { gameId });
+      setGame(null);
+      setGameId(null);
+      setPlayerId(null);
+    } else {
+      setError('Socket not connected');
+    }
+  }, [socket, connected]);
+  
+  // Function to reconnect to a game
+  const reconnectGame = useCallback((gameId: string, playerId: string) => {
+    if (socket && connected) {
+      socket.emit('reconnect_game', { gameId, playerId });
     } else {
       setError('Socket not connected');
     }
@@ -163,15 +214,6 @@ export const useSocket = (): SocketHookReturn => {
       }
     });
   }, [socket, connected]);
-  
-  // Function to reconnect to a game
-  const reconnectGame = useCallback((gameId: string, playerId: string) => {
-    if (socket && connected) {
-      socket.emit('reconnect_game', { gameId, playerId });
-    } else {
-      setError('Socket not connected');
-    }
-  }, [socket, connected]);
 
   return {
     socket,
@@ -184,6 +226,8 @@ export const useSocket = (): SocketHookReturn => {
     reconnectGame,
     getAllGames,
     game,
+    playerId,
+    gameId,
     error,
   };
 }; 

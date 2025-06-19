@@ -40,9 +40,24 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       // Handle creating a new game
       socket.on('create_game', ({ playerNames }: { playerNames: string[] }) => {
         try {
+          // Validate player names
+          if (!playerNames || playerNames.length === 0) {
+            socket.emit('error', { message: 'At least one player name is required' });
+            return;
+          }
+          
+          // Validate each player name
+          for (const name of playerNames) {
+            if (!name || name.trim() === '') {
+              socket.emit('error', { message: 'Player names cannot be empty' });
+              return;
+            }
+          }
+          
+          // Create the game
           const game = gameSessionManager.createGame(playerNames);
           
-          // Join the game room
+          // Create a dedicated room for this game
           socket.join(game.id);
           
           // Map this socket to the first player
@@ -50,7 +65,11 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
           socketPlayerMap.addMapping(socket.id, firstPlayer.id, game.id);
           
           // Send the game state back to the client
-          io.to(game.id).emit('game_created', game);
+          socket.emit('game_created', {
+            game,
+            playerId: firstPlayer.id,
+            gameId: game.id
+          });
           
           console.log(`Game created: ${game.id} with players: ${playerNames.join(', ')}`);
           console.log(`Active games: ${gameSessionManager.getActiveGameCount()}`);
@@ -61,8 +80,41 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       
       // Handle joining an existing game
       socket.on('join_game', ({ gameId, playerName }: { gameId: string, playerName: string }) => {
+        // Validate game ID
+        if (!gameId || gameId.trim() === '') {
+          socket.emit('error', { message: 'Game ID is required' });
+          return;
+        }
+        
+        // Validate player name
+        if (!playerName || playerName.trim() === '') {
+          socket.emit('error', { message: 'Player name is required' });
+          return;
+        }
+        
+        // Check if game exists
         if (!gameSessionManager.gameExists(gameId)) {
+          socket.emit('error', { message: `Game with ID ${gameId} not found` });
+          return;
+        }
+        
+        // Get the game to check player count
+        const existingGame = gameSessionManager.getGame(gameId);
+        if (!existingGame) {
           socket.emit('error', { message: 'Game not found' });
+          return;
+        }
+        
+        // Check if the game already has too many players (optional limit)
+        const MAX_PLAYERS = 8; // Set a reasonable limit
+        if (existingGame.players.length >= MAX_PLAYERS) {
+          socket.emit('error', { message: `Game is full (maximum ${MAX_PLAYERS} players)` });
+          return;
+        }
+        
+        // Check if player name is already taken in this game
+        if (existingGame.players.some(p => p.name === playerName)) {
+          socket.emit('error', { message: 'Player name is already taken in this game' });
           return;
         }
         
@@ -83,10 +135,18 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
         // Join the game room
         socket.join(gameId);
         
-        // Send the current game state to all players in the room
-        io.to(gameId).emit('player_joined', {
+        // Send confirmation to the joining player
+        socket.emit('game_joined', {
           game: updatedGame,
-          playerName
+          playerId: newPlayer.id,
+          gameId
+        });
+        
+        // Notify other players in the room
+        socket.to(gameId).emit('player_joined', {
+          game: updatedGame,
+          playerName,
+          playerId: newPlayer.id
         });
         
         console.log(`Player ${playerName} joined game: ${gameId}`);

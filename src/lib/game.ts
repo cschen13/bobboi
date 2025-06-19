@@ -46,7 +46,25 @@ export function shuffleDeck(deck: Card[]): Card[] {
  * @returns A string ID
  */
 function generateGameId(): string {
-  return Math.random().toString(36).substring(2, 9);
+  // Generate a random alphanumeric string (uppercase letters and numbers only)
+  // Format: XXXX-XXXX (where X is a letter or number)
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = '';
+  
+  // Generate first part (4 characters)
+  for (let i = 0; i < 4; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  // Add separator
+  id += '-';
+  
+  // Generate second part (4 characters)
+  for (let i = 0; i < 4; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  return id;
 }
 
 /**
