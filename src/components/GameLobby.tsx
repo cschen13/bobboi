@@ -65,17 +65,17 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
   
   return (
     <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">Bobboi Game</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center text-[#651c1d]">Bobboi Card Game</h1>
       
       {!connected && (
-        <div className="mb-4 p-3 bg-yellow-100 text-yellow-700 rounded">
+        <div className="mb-4 p-3 bg-[#f2bf27]/20 text-[#651c1d] rounded-lg border border-[#f2bf27]">
           <p className="font-bold">Connecting to server...</p>
           <p className="text-sm mt-1">This may take a few moments. If it doesn't connect, try refreshing the page.</p>
         </div>
       )}
       
       {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg border border-red-200">
           <p className="font-bold">Error:</p>
           <p>{error}</p>
         </div>
@@ -84,34 +84,39 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
       {!isInGame ? (
         <>
           <div className="mb-6">
-            <label className="block mb-2 text-sm font-medium">
+            <label className="block mb-2 text-sm font-medium text-[#651c1d]">
               Your Name:
             </label>
             <input
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-3 border-2 border-[#f2bf27] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#651c1d] focus:border-[#651c1d] transition-colors"
               placeholder="Enter your name"
             />
           </div>
           
           {activeMode === 'join' ? (
-            <form onSubmit={handleJoinGame} className="space-y-3">
-              <input
-                type="text"
-                value={gameIdInput || urlGameId || ''}
-                onChange={(e) => setGameIdInput(e.target.value)}
-                className="w-full p-2 border rounded"
-                placeholder="Enter game code (e.g. ABCD-1234)"
-              />
+            <form onSubmit={handleJoinGame} className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-[#651c1d]">
+                  Game Code:
+                </label>
+                <input
+                  type="text"
+                  value={gameIdInput || urlGameId || ''}
+                  onChange={(e) => setGameIdInput(e.target.value)}
+                  className="w-full p-3 border-2 border-[#f2bf27] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#651c1d] focus:border-[#651c1d] transition-colors"
+                  placeholder="Enter game code (e.g. ABCD-1234)"
+                />
+              </div>
               <button
                 type="submit"
                 disabled={!connected || !playerName.trim() || !(gameIdInput || urlGameId)}
-                className={`w-full p-3 rounded font-medium ${
+                className={`w-full p-4 rounded-lg font-bold text-lg transition-colors ${
                   !connected || !playerName.trim() || !(gameIdInput || urlGameId)
-                    ? 'bg-gray-300 text-gray-500'
-                    : 'bg-green-600 text-white hover:bg-green-700'
+                    ? 'bg-gray-200 text-gray-500'
+                    : 'bg-[#651c1d] text-white hover:bg-[#7a2324]'
                 }`}
               >
                 Join Game
@@ -121,21 +126,21 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
                 <button 
                   type="button" 
                   onClick={() => setActiveMode('create')}
-                  className="text-blue-600 hover:underline"
+                  className="text-[#651c1d] hover:text-[#7a2324] font-medium hover:underline"
                 >
                   Or create a new game instead
                 </button>
               </div>
             </form>
           ) : (
-            <div className="grid grid-cols-1 gap-4 mb-6">
+            <div className="grid grid-cols-1 gap-5 mb-6">
               <button
                 onClick={handleCreateGame}
                 disabled={!connected || !playerName.trim()}
-                className={`p-3 rounded font-medium ${
+                className={`p-4 rounded-lg font-bold text-lg transition-colors ${
                   !connected || !playerName.trim()
-                    ? 'bg-gray-300 text-gray-500'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-gray-200 text-gray-500'
+                    : 'bg-[#f2bf27] text-[#651c1d] hover:bg-[#e5b01c]'
                 }`}
               >
                 Create New Game
@@ -143,40 +148,29 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
+                  <div className="w-full border-t-2 border-[#f2bf27]/30"></div>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="px-2 bg-white text-sm text-gray-500">OR</span>
+                  <span className="px-4 bg-white text-sm text-[#651c1d]">OR</span>
                 </div>
               </div>
               
-              <form onSubmit={handleJoinGame} className="space-y-3">
-                <input
-                  type="text"
-                  value={gameIdInput || urlGameId || ''}
-                  onChange={(e) => setGameIdInput(e.target.value)}
-                  className="w-full p-2 border rounded"
-                  placeholder="Enter game code (e.g. ABCD-1234)"
-                />
+              <div>
                 <button
-                  type="submit"
-                  disabled={!connected || !playerName.trim() || !(gameIdInput || urlGameId)}
-                  className={`w-full p-3 rounded font-medium ${
-                    !connected || !playerName.trim() || !(gameIdInput || urlGameId)
-                      ? 'bg-gray-300 text-gray-500'
-                      : 'bg-green-600 text-white hover:bg-green-700'
-                  }`}
+                  type="button" 
+                  onClick={() => setActiveMode('join')}
+                  className="w-full p-4 rounded-lg font-bold text-lg bg-white border-2 border-[#651c1d] text-[#651c1d] hover:bg-[#651c1d]/10 transition-colors"
                 >
-                  Join Game
+                  Join Existing Game
                 </button>
-              </form>
+              </div>
             </div>
           )}
         </>
       ) : (
         <div className="space-y-4 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p>Connecting to game...</p>
+          <div className="w-12 h-12 border-4 border-[#f2bf27] border-t-[#651c1d] rounded-full animate-spin mx-auto"></div>
+          <p className="text-[#651c1d]">Connecting to game...</p>
         </div>
       )}
     </div>
