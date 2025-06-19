@@ -73,8 +73,8 @@ function generateGameId(): string {
  * @returns A new Game object
  */
 export function createGame(playerNames: string[]): Game {
-  if (playerNames.length < 2) {
-    throw new Error('At least 2 players are required');
+  if (playerNames.length < 1) {
+    throw new Error('At least 1 player is required');
   }
   
   // Create players with null cards initially
@@ -87,12 +87,18 @@ export function createGame(playerNames: string[]): Game {
   // Create and shuffle the deck
   const deck = shuffleDeck(createDeck());
   
-  // Deal one card to each player
-  for (let i = 0; i < players.length && i < deck.length; i++) {
-    const card = deck.shift(); // Take from the top of the deck
-    if (card) {
-      // Use type assertion to assign the card
-      (players[i] as any).card = card;
+  // Set the initial game state based on player count
+  const initialGameState = playerNames.length >= 2 ? GameState.PLAYING : GameState.WAITING_FOR_PLAYERS;
+  
+  // Only deal cards if we're in PLAYING state (2+ players)
+  if (initialGameState === GameState.PLAYING) {
+    // Deal one card to each player
+    for (let i = 0; i < players.length && i < deck.length; i++) {
+      const card = deck.shift(); // Take from the top of the deck
+      if (card) {
+        // Use type assertion to assign the card
+        (players[i] as any).card = card;
+      }
     }
   }
   
@@ -103,7 +109,7 @@ export function createGame(playerNames: string[]): Game {
     deck,
     round: 1,
     turn: 0, // First player starts
-    gameState: GameState.PLAYING
+    gameState: initialGameState
   };
   
   return game;
