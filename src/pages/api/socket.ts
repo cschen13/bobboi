@@ -374,16 +374,15 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
         return;
       }
       
-      // Check if the requesting player is the creator (first player)
+      // Check if the requesting player is in the game
       const playerInfo = socketPlayerMap.getPlayerInfo(socket.id);
       if (!playerInfo) {
         socket.emit('error', { message: 'Player information not found' });
         return;
       }
-      
-      const isCreator = game.players.length > 0 && game.players[0].id === playerInfo.playerId;
-      if (!isCreator) {
-        socket.emit('error', { message: 'Only the game creator can start the game' });
+      const isPlayerInGame = game.players.some(p => p.id === playerInfo.playerId);
+      if (!isPlayerInGame) {
+        socket.emit('error', { message: 'You must be a player in the game to start it' });
         return;
       }
       

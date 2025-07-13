@@ -133,24 +133,28 @@ export const useSocket = (): SocketHookReturn => {
         socketInstance.on('game_state', (gameData: Game) => {
           console.log('Game state received:', gameData);
           setGame(gameData);
+          setGameId(gameData.id);
           setError(null);
         });
 
         socketInstance.on('player_joined', (data: PlayerJoinedEvent) => {
           console.log(`Player ${data.playerName} joined the game`);
           setGame(data.game);
+          setGameId(data.game.id);
           setError(null);
         });
 
         socketInstance.on('player_left', (data: PlayerLeftEvent) => {
           console.log(`Player ${data.playerName} left the game`);
           setGame(data.game);
+          setGameId(data.game.id);
           setError(null);
         });
 
         socketInstance.on('game_restarted', (gameData: Game) => {
           console.log('Game restarted:', gameData);
           setGame(gameData);
+          setGameId(gameData.id);
           setError(null);
         });
 
@@ -165,12 +169,14 @@ export const useSocket = (): SocketHookReturn => {
         socketInstance.on('game_started', (data: GameStartedEvent) => {
           console.log('Game started:', data);
           setGame(data.game);
+          setGameId(data.game.id);
           setError(null);
         });
         
         socketInstance.on('game_state_update', (gameData: Game) => {
           console.log('Game state updated:', gameData);
           setGame(gameData);
+          setGameId(gameData.id);
           setError(null);
         });
 
@@ -191,6 +197,7 @@ export const useSocket = (): SocketHookReturn => {
 
   // Function to create a new game
   const createGame = useCallback((playerNames: string[]) => {
+    console.log('Creating game with player names:', playerNames);
     if (socket && connected) {
       socket.emit('create_game', { playerNames });
     } else {
@@ -200,6 +207,7 @@ export const useSocket = (): SocketHookReturn => {
 
   // Function to join an existing game
   const joinGame = useCallback((gameId: string, playerName: string) => {
+    console.log('Joining game with ID:', gameId, 'and player name:', playerName);
     if (socket && connected) {
       socket.emit('join_game', { gameId, playerName });
     } else {
