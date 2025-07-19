@@ -155,8 +155,8 @@ const GamePlayPage: React.FC = () => {
           </div>
         </header>
         
-        <main className="flex-grow flex items-center justify-center px-4 py-8">
-          <div className="w-full max-w-5xl mx-auto">
+        <main className="flex-grow px-4 py-8">
+          <div className="w-full max-w-6xl mx-auto">
             {error && (
               <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-200">
                 <p className="font-bold">Error:</p>
@@ -164,72 +164,68 @@ const GamePlayPage: React.FC = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Game info panel */}
-              <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-                <div className="p-6 border-b border-[#f2bf27]">
-                  <h2 className="font-bold text-xl text-[#651c1d] mb-2">Game Info</h2>
-                  <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg mb-3">
-                    <span className="text-gray-600">Game ID:</span>
-                    <span className="font-mono font-bold text-[#651c1d]">{gameId}</span>
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+                  <div className="p-4 border-b border-[#f2bf27]">
+                    <h2 className="font-bold text-lg text-[#651c1d] mb-2">Game Info</h2>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between bg-[#f8f8f8] p-2 rounded text-sm">
+                        <span className="text-gray-600">Game ID:</span>
+                        <span className="font-mono font-bold text-[#651c1d]">{gameId}</span>
+                      </div>
+                      <div className="flex items-center justify-between bg-[#f8f8f8] p-2 rounded text-sm">
+                        <span className="text-gray-600">Players:</span>
+                        <span className="font-bold text-[#651c1d]">{game.players.length}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between bg-[#f8f8f8] p-3 rounded-lg">
-                    <span className="text-gray-600">Players:</span>
-                    <span className="font-bold text-[#651c1d]">{game.players.length}</span>
-                  </div>
-                </div>
-                
-                {/* Player list */}
-                <div className="p-6 bg-[#fffaf0]">
-                  <h3 className="font-bold text-lg mb-3 text-[#651c1d]">Players</h3>
-                  <ul className="space-y-2">
-                    {game.players.map((player) => (
-                      <li 
-                        key={player.id} 
-                        className={`p-3 rounded-lg flex items-center justify-between ${
-                          player.id === playerId 
-                            ? 'bg-[#651c1d]/10 border border-[#651c1d]/30' 
-                            : 'bg-white border border-[#f2bf27]/30'
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-[#f2bf27] flex items-center justify-center mr-2 text-[#651c1d] font-bold">
-                            {player.name.charAt(0).toUpperCase()}
+                  
+                  {/* Player list */}
+                  <div className="p-4 bg-[#fffaf0]">
+                    <h3 className="font-bold text-md mb-3 text-[#651c1d]">Players</h3>
+                    <ul className="space-y-2">
+                      {game.players.map((player) => (
+                        <li 
+                          key={player.id} 
+                          className={`p-2 rounded-lg flex items-center justify-between text-sm ${
+                            player.id === playerId 
+                              ? 'bg-[#651c1d]/10 border border-[#651c1d]/30' 
+                              : 'bg-white border border-[#f2bf27]/30'
+                          }`}
+                        >
+                          <div className="flex items-center">
+                            <div className="h-6 w-6 rounded-full bg-[#f2bf27] flex items-center justify-center mr-2 text-[#651c1d] font-bold text-xs">
+                              {player.name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className={`${player.id === playerId ? 'font-bold' : ''} text-[#651c1d] text-sm`}>
+                              {player.name} {player.id === playerId ? '(You)' : ''}
+                            </span>
                           </div>
-                          <span className={`${player.id === playerId ? 'font-bold' : ''} text-[#651c1d]`}>
-                            {player.name} {player.id === playerId ? '(You)' : ''}
-                          </span>
-                        </div>
-                        {player.id === game.players[0].id && (
-                          <span className="bg-[#651c1d] text-white text-xs px-2 py-1 rounded-full">
-                            Host
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                          {player.id === game.players[0].id && (
+                            <span className="bg-[#651c1d] text-white text-xs px-1 py-0.5 rounded">
+                              Host
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
               
               {/* Game board */}
-              <div className="md:col-span-2">
-                <div className="bg-white rounded-xl shadow-xl overflow-hidden h-full">
-                  <div className="p-6 border-b border-[#f2bf27]">
-                    <h2 className="font-bold text-xl text-[#651c1d]">Game Board</h2>
-                  </div>
-                  
-                  <div className="p-6 flex flex-col items-center justify-center h-[400px] bg-[#fffaf0]">
-                    <GameBoard
-                      players={boardPlayers}
-                      currentRound={game.round}
-                      currentTurnPlayerId={currentTurnPlayerId}
-                      actionLog={actionLog}
-                      selfPlayerId={playerId || ''}
-                      roundState={roundState}
-                      onAction={handleAction}
-                    />
-                  </div>
-                </div>
+              <div className="lg:col-span-3">
+                <GameBoard
+                  players={boardPlayers}
+                  currentRound={game.round}
+                  currentTurnPlayerId={currentTurnPlayerId}
+                  actionLog={actionLog}
+                  selfPlayerId={playerId || ''}
+                  roundState={roundState}
+                  onAction={handleAction}
+                />
               </div>
             </div>
           </div>

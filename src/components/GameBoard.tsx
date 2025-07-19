@@ -53,16 +53,16 @@ const GameBoard: React.FC<GameBoardProps> = ({
   let actionUI = null;
   if (roundState.round === 1) {
     actionUI = (
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <button
-          className="bg-green-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-green-600 hover:bg-green-700 text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           disabled={!isMyTurn}
           onClick={() => isMyTurn && onAction({ type: 'pair', value: true })}
         >
           Yes
         </button>
         <button
-          className="bg-red-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           disabled={!isMyTurn}
           onClick={() => isMyTurn && onAction({ type: 'pair', value: false })}
         >
@@ -74,27 +74,29 @@ const GameBoard: React.FC<GameBoardProps> = ({
     const total = roundState.totalPlayers;
     actionUI = (
       <form
-        className="flex gap-2 items-center"
+        className="flex gap-3 items-center flex-wrap"
         onSubmit={e => {
           e.preventDefault();
           if (isMyTurn) onAction({ type: 'perceivedRank', value: perceivedRank });
         }}
       >
-        <label htmlFor="perceived-rank" className="text-sm">Rank:</label>
-        <select
-          id="perceived-rank"
-          className="rounded border px-2 py-1"
-          value={perceivedRank}
-          disabled={!isMyTurn}
-          onChange={e => setPerceivedRank(e.target.value)}
-        >
-          {getRankOptions(total).map(opt => (
-            <option key={opt} value={opt}>{opt}{getOrdinalSuffix(Number(opt))}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <label htmlFor="perceived-rank" className="text-sm font-medium text-[#651c1d]">Rank:</label>
+          <select
+            id="perceived-rank"
+            className="rounded-lg border border-[#f2bf27]/50 px-3 py-2 text-[#651c1d] focus:outline-none focus:ring-2 focus:ring-[#f2bf27]"
+            value={perceivedRank}
+            disabled={!isMyTurn}
+            onChange={e => setPerceivedRank(e.target.value)}
+          >
+            {getRankOptions(total).map(opt => (
+              <option key={opt} value={opt}>{opt}{getOrdinalSuffix(Number(opt))}</option>
+            ))}
+          </select>
+        </div>
         <button
           type="submit"
-          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-[#651c1d] hover:bg-[#7a2324] text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           disabled={!isMyTurn}
         >
           Submit
@@ -104,26 +106,28 @@ const GameBoard: React.FC<GameBoardProps> = ({
   } else if (roundState.round === 3) {
     actionUI = (
       <form
-        className="flex gap-2 items-center"
+        className="flex gap-3 items-center flex-wrap"
         onSubmit={e => {
           e.preventDefault();
           if (isMyTurn && guessedRank.trim()) onAction({ type: 'guess', value: guessedRank.trim().toUpperCase() });
         }}
       >
-        <label htmlFor="guess-rank" className="text-sm">Your Guess:</label>
-        <input
-          id="guess-rank"
-          className="rounded border px-2 py-1 w-16 text-center uppercase"
-          type="text"
-          maxLength={2}
-          placeholder="A, 2...K"
-          value={guessedRank}
-          disabled={!isMyTurn}
-          onChange={e => setGuessedRank(e.target.value)}
-        />
+        <div className="flex items-center gap-2">
+          <label htmlFor="guess-rank" className="text-sm font-medium text-[#651c1d]">Your Guess:</label>
+          <input
+            id="guess-rank"
+            className="rounded-lg border border-[#f2bf27]/50 px-3 py-2 w-20 text-center uppercase font-mono text-[#651c1d] focus:outline-none focus:ring-2 focus:ring-[#f2bf27]"
+            type="text"
+            maxLength={2}
+            placeholder="A, 2...K"
+            value={guessedRank}
+            disabled={!isMyTurn}
+            onChange={e => setGuessedRank(e.target.value)}
+          />
+        </div>
         <button
           type="submit"
-          className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50"
+          className="bg-[#651c1d] hover:bg-[#7a2324] text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           disabled={!isMyTurn || !guessedRank.trim()}
         >
           Submit
@@ -144,87 +148,117 @@ const GameBoard: React.FC<GameBoardProps> = ({
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-md mx-auto bg-white dark:bg-gray-900 p-2 sm:p-4">
-      {/* Game Status */}
-      <section className="mb-4">
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden h-full">
+      {/* Header */}
+      <div className="p-4 border-b border-[#f2bf27] bg-[#f2bf27]">
         <div className="flex justify-between items-center">
-          <span className="text-lg font-semibold">Round: {currentRound}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-300">Current Turn: {players.find(p => p.id === currentTurnPlayerId)?.name || '—'}</span>
+          <h2 className="font-bold text-lg text-[#651c1d]">Round {currentRound}</h2>
+          <span className="text-sm text-[#651c1d] font-medium">
+            Turn: {players.find(p => p.id === currentTurnPlayerId)?.name || '—'}
+          </span>
         </div>
-      </section>
+      </div>
 
-      {/* Player Hands */}
-      <section className="mb-4">
-        <h2 className="text-md font-semibold mb-2">Player Hands</h2>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {players.map((player) => {
-            const isCurrentTurn = player.id === currentTurnPlayerId;
-            return (
-              <div
-                key={player.id}
-                className={`flex flex-col items-center rounded p-2 min-w-[60px] bg-gray-100 dark:bg-gray-800 relative transition-all duration-200
-                  ${isCurrentTurn ? 'border-2 border-blue-500 shadow-lg bg-blue-50 dark:bg-blue-900' : ''}`}
-                aria-current={isCurrentTurn ? 'true' : undefined}
-              >
-                <span className="text-xs font-medium mb-1 flex items-center gap-1">
-                  {player.name}
-                  {isCurrentTurn && (
-                    <span title="Current Turn" className="inline-block align-middle text-blue-500">★</span>
-                  )}
-                </span>
-                <div className="w-10 h-14 bg-gray-300 dark:bg-gray-700 rounded shadow-inner flex items-center justify-center">
-                  <span className="text-lg text-gray-500">
-                    {player.id === selfPlayerId ? '?' : player.card}
+      <div className="p-4 space-y-6 bg-[#fffaf0] h-full">
+        {/* Player Hands */}
+        <section>
+          <h3 className="text-md font-semibold mb-3 text-[#651c1d]">Player Cards</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {players.map((player) => {
+              const isCurrentTurn = player.id === currentTurnPlayerId;
+              return (
+                <div
+                  key={player.id}
+                  className={`flex flex-col items-center rounded-lg p-3 bg-white border-2 transition-all duration-200 ${
+                    isCurrentTurn 
+                      ? 'border-[#f2bf27] shadow-lg ring-2 ring-[#f2bf27]/30' 
+                      : 'border-gray-200 hover:border-[#f2bf27]/50'
+                  }`}
+                >
+                  <span className="text-xs font-medium mb-2 text-[#651c1d] flex items-center gap-1">
+                    {player.name}
+                    {isCurrentTurn && (
+                      <span title="Current Turn" className="text-[#f2bf27]">★</span>
+                    )}
                   </span>
+                  <div className="w-12 h-16 bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 rounded-lg shadow-inner flex items-center justify-center">
+                    <span className="text-xl font-bold text-[#651c1d]">
+                      {player.id === selfPlayerId ? '?' : player.card}
+                    </span>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Action UI */}
+        <section>
+          <h3 className="text-md font-semibold mb-3 text-[#651c1d]">Your Action</h3>
+          <div className="bg-white rounded-lg p-4 border border-[#f2bf27]/30">
+            {isMyTurn ? (
+              <div className="space-y-3">
+                {roundState.round === 1 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-3">Do you see a pair among the other players' cards?</p>
+                    {actionUI}
+                  </div>
+                )}
+                {roundState.round === 2 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-3">What do you think your ranking is?</p>
+                    {actionUI}
+                  </div>
+                )}
+                {roundState.round === 3 && (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-3">What rank do you think your card is?</p>
+                    {actionUI}
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      </section>
+            ) : (
+              <p className="text-gray-500 text-sm">Waiting for {players.find(p => p.id === currentTurnPlayerId)?.name}'s turn...</p>
+            )}
+          </div>
+        </section>
 
-      {/* Action UI */}
-      <section className="mb-4">
-        <h2 className="text-md font-semibold mb-2">Your Action</h2>
-        <div className="flex flex-col gap-2">
-          {actionUI}
-        </div>
-      </section>
-
-      {/* Action Log */}
-      <section className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800 rounded p-2">
-        <h2 className="text-md font-semibold mb-2">Action Log</h2>
-        <ul className="space-y-1 text-sm">
-          {actionLog.length === 0 ? (
-            <li className="text-gray-400">No actions yet.</li>
-          ) : (
-            actionLog.map((entry, idx) => (
-              <li key={idx} className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                <span className="font-semibold">{entry.playerName}</span>
-                <span className="text-xs text-gray-400">(Round {entry.round})</span>
-                {entry.type === 'pair' && (
-                  <span className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
-                    <span title="Pair Declaration">🔗</span>
-                    <span>{entry.value ? 'saw a pair' : 'did not see a pair'}</span>
-                  </span>
-                )}
-                {entry.type === 'perceivedRank' && (
-                  <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                    <span title="Perceived Rank">🏅</span>
-                    <span>declared {entry.value}{getOrdinalSuffix(Number(entry.value))} highest</span>
-                  </span>
-                )}
-                {entry.type === 'guess' && (
-                  <span className="inline-flex items-center gap-1 text-purple-600 dark:text-purple-400">
-                    <span title="Guess">🎴</span>
-                    <span>guessed <span className="font-mono font-bold">{entry.value}</span></span>
-                  </span>
-                )}
-              </li>
-            ))
-          )}
-        </ul>
-      </section>
+        {/* Action Log */}
+        <section className="flex-1 min-h-0">
+          <h3 className="text-md font-semibold mb-3 text-[#651c1d]">Action Log</h3>
+          <div className="bg-white rounded-lg border border-[#f2bf27]/30 p-3 h-48 overflow-y-auto">
+            <ul className="space-y-2 text-sm">
+              {actionLog.length === 0 ? (
+                <li className="text-gray-400 italic">No actions yet.</li>
+              ) : (
+                actionLog.map((entry, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-gray-700 p-2 bg-gray-50 rounded">
+                    <span className="font-semibold text-[#651c1d]">{entry.playerName}</span>
+                    <span className="text-xs text-gray-400 mt-0.5">(Round {entry.round})</span>
+                    <div className="flex-1">
+                      {entry.type === 'pair' && (
+                        <span className="text-blue-600">
+                          {entry.value ? 'saw a pair' : 'did not see a pair'}
+                        </span>
+                      )}
+                      {entry.type === 'perceivedRank' && (
+                        <span className="text-green-600">
+                          declared {entry.value}{getOrdinalSuffix(Number(entry.value))} highest
+                        </span>
+                      )}
+                      {entry.type === 'guess' && (
+                        <span className="text-purple-600">
+                          guessed <span className="font-mono font-bold">{entry.value}</span>
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
