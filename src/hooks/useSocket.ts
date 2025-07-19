@@ -131,7 +131,8 @@ export const useSocket = (): SocketHookReturn => {
         });
         
         socketInstance.on('game_state', (gameData: Game) => {
-          console.log('Game state received:', gameData);
+          console.log('🔄 RECONNECT: Game state received:', gameData);
+          console.log('🔄 RECONNECT: Game state is:', gameData.gameState);
           setGame(gameData);
           setGameId(gameData.id);
           setError(null);
@@ -167,7 +168,9 @@ export const useSocket = (): SocketHookReturn => {
         });
         
         socketInstance.on('game_started', (data: GameStartedEvent) => {
-          console.log('Game started:', data);
+          console.log('🎮 GAME_STARTED EVENT RECEIVED:', data);
+          console.log('🎮 New game state:', data.game.gameState);
+          console.log('🎮 Setting game state in useSocket...');
           setGame(data.game);
           setGameId(data.game.id);
           setError(null);
@@ -260,8 +263,10 @@ export const useSocket = (): SocketHookReturn => {
   // Function to start a game
   const startGame = useCallback((gameId: string) => {
     if (socket && connected) {
+      console.log('🚀 useSocket.startGame: Starting game with ID:', gameId);
       socket.emit('start_game', { gameId });
     } else {
+      console.log('🚀 useSocket.startGame: Socket not connected!', { socket: !!socket, connected });
       setError('Socket not connected');
     }
   }, [socket, connected]);

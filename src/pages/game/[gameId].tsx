@@ -29,17 +29,22 @@ const GameLobbyPage: React.FC = () => {
     if (!router.isReady) return;
     
     const gameIdString = routeGameId as string;
-    console.log('routeGameId:', routeGameId, 'gameIdString:', gameIdString, 'game:', game);
+    console.log('🔄 LOBBY RECONNECTION EFFECT:', {
+      routeGameId,
+      gameIdString,
+      hasGame: !!game,
+      gameState: game?.gameState
+    });
     const savedSession = getSavedGameSession();
-    console.log('savedSession:', savedSession);
+    console.log('🔄 savedSession:', savedSession);
     
     // If we have game ID in URL but no active game, try to reconnect
     if (gameIdString && !game) {
       if (savedSession && savedSession.gameId === gameIdString) {
-        console.log('Reconnecting to game...');
+        console.log('🔄 Reconnecting to game...');
         reconnectGame(savedSession.gameId, savedSession.playerId);
       } else {
-        console.log('No session, redirecting to join');
+        console.log('🔄 No session, redirecting to join');
         router.replace(`/join?gameId=${gameIdString}`);
       }
     }
@@ -47,7 +52,14 @@ const GameLobbyPage: React.FC = () => {
   
   // Effect to redirect to game page when game starts
   useEffect(() => {
+    console.log('🎮 Game state effect triggered:', {
+      gameState: game?.gameState,
+      gameId: gameId,
+      isPlaying: game?.gameState === GameState.PLAYING
+    });
+    
     if (game?.gameState === GameState.PLAYING && gameId) {
+      console.log('🎮 REDIRECTING TO PLAY PAGE:', `/game/${gameId}/play`);
       router.push(`/game/${gameId}/play`);
     }
   }, [game?.gameState, gameId, router]);
@@ -64,8 +76,12 @@ const GameLobbyPage: React.FC = () => {
   
   // Handle starting the game
   const handleStartGame = () => {
+    console.log('🚀 START GAME CLICKED:', { connected, gameId, game: game?.gameState });
     if (connected && gameId) {
+      console.log('🚀 EMITTING start_game event for gameId:', gameId);
       startGame(gameId);
+    } else {
+      console.log('🚀 CANNOT START GAME:', { connected, gameId });
     }
   };
   

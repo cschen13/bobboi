@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useSocket } from '../../../hooks/useSocket';
 import { GameState } from '../../../lib/types';
+import { getSavedGameSession } from '../../../lib/socketUtils';
 import GameBoard from '../../../components/GameBoard';
 
 const GamePlayPage: React.FC = () => {
@@ -24,29 +25,46 @@ const GamePlayPage: React.FC = () => {
     if (!router.isReady) return;
     
     const gameIdString = routeGameId as string;
+    console.log('🎲 PLAY PAGE: Reconnection effect triggered:', {
+      gameIdString,
+      hasGame: !!game,
+      connected
+    });
     
     // If we have game ID in URL but no active game, try to reconnect
-    if (gameIdString && !game) {
-      const savedSession = localStorage.getItem('gameSession');
+    if (gameIdString && !game && connected) {
+      console.log('🎲 PLAY PAGE: Need to reconnect, checking saved session...');
+      const savedSession = getSavedGameSession();
       
       if (savedSession) {
-        const session = JSON.parse(savedSession);
-        if (session.gameId === gameIdString) {
-          reconnectGame(session.gameId, session.playerId);
+        console.log('🎲 PLAY PAGE: Found saved session:', savedSession);
+        if (savedSession.gameId === gameIdString) {
+          console.log('🎲 PLAY PAGE: Reconnecting to game...');
+          reconnectGame(savedSession.gameId, savedSession.playerId);
         } else {
-          // No saved session for this game, redirect to join page
+          console.log('🎲 PLAY PAGE: Session mismatch, redirecting to join');
           router.replace(`/join?gameId=${gameIdString}`);
         }
       } else {
-        // No saved session at all, redirect to join page
+        console.log('🎲 PLAY PAGE: No saved session, redirecting to join');
         router.replace(`/join?gameId=${gameIdString}`);
       }
     }
-  }, [router.isReady, routeGameId, game, reconnectGame, router]);
+  }, [router.isReady, routeGameId, game, reconnectGame, router, connected]);
   
-  // Effect to redirect to lobby if game not started
+  // Effect to redirect to lobby if game not started (but only after we have a game object)
   useEffect(() => {
+    console.log('🎲 PLAY PAGE: Game state check:', {
+      gameState: game?.gameState,
+      gameId: gameId,
+      shouldRedirectToLobby: game && game.gameState !== GameState.PLAYING,
+      hasGame: !!game
+    });
+    
+    // Only redirect if we have a game object AND it's not in PLAYING state
+    // This prevents redirecting during the initial load/reconnection phase
     if (game && game.gameState !== GameState.PLAYING && gameId) {
+      console.log('🎲 PLAY PAGE: Game not PLAYING, redirecting to lobby:', `/game/${gameId}`);
       router.replace(`/game/${gameId}`);
     }
   }, [game?.gameState, gameId, router]);
