@@ -30,13 +30,15 @@ const GameLobbyPage: React.FC = () => {
       routeGameId,
       gameIdString,
       hasGame: !!game,
-      gameState: game?.gameState
+      gameState: game?.gameState,
+      connected
     });
-    const savedSession = getSavedGameSession();
-    console.log('🔄 savedSession:', savedSession);
     
-    // If we have game ID in URL but no active game, try to reconnect
-    if (gameIdString && !game) {
+    // Only try to reconnect if we don't have a game AND we're connected
+    if (gameIdString && !game && connected) {
+      const savedSession = getSavedGameSession();
+      console.log('🔄 savedSession:', savedSession);
+      
       if (savedSession && savedSession.gameId === gameIdString) {
         console.log('🔄 Reconnecting to game...');
         reconnectGame(savedSession.gameId, savedSession.playerId);
@@ -45,7 +47,7 @@ const GameLobbyPage: React.FC = () => {
         router.replace(`/join?gameId=${gameIdString}`);
       }
     }
-  }, [router.isReady, routeGameId, game, reconnectGame, router]);
+  }, [router.isReady, routeGameId, game, connected, reconnectGame, router]);
   
   // Effect to redirect to game page when game starts
   useEffect(() => {
