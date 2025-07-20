@@ -1,4 +1,4 @@
-import { Game, Player, GameState, Round1Declaration, GameAction } from './types';
+import { Game, Player, GameState, Round1Declaration, Round2Ranking, GameAction } from './types';
 import { createGame, restartGame, shuffleDeck, createDeck } from './game';
 
 /**
@@ -165,6 +165,7 @@ export class GameSessionManager {
     game.roundPhase = 'round1';
     game.currentTurnPlayerId = game.players[0]?.id;
     game.round1Declarations = [];
+    game.round2Rankings = [];
     game.actionLog = [];
     
     // Create and shuffle a new deck
@@ -290,5 +291,98 @@ export class GameSessionManager {
     console.log(`Round phase: ${game.roundPhase}`);
 
     return game;
+  }
+
+  /**
+   * Handle a Round 2 ranking declaration from a player
+   * @param gameId The game ID
+   * @param playerId The player making the ranking declaration
+   * @param perceivedRank The rank the player thinks they are (1 = highest)
+   * @returns The updated game or null if invalid
+   */
+  handleRound2Ranking(gameId: string, playerId: string, perceivedRank: number): Game | null {
+    const game = this.games.get(gameId);
+    if (!game) return null;
+
+    // Validate game state
+    if (game.gameState !== GameState.PLAYING || game.roundPhase !== 'round2') {
+      return null;
+    }
+
+    // Validate it's the player's turn
+    if (game.currentTurnPlayerId !== playerId) {
+      return null;
+    }
+
+    // Validate perceived rank is within valid range
+    if (perceivedRank < 1 || perceivedRank > game.players.length) {
+      return null;
+    }
+
+    // Check if player already declared in Round 2
+    if (game.round2Rankings.some(r => r.playerId === playerId)) {
+      return null;
+    }
+
+    // Find the player
+    const player = game.players.find(p => p.id === playerId);
+    if (!player) return null;
+
+    // Create the ranking declaration
+    const ranking: Round2Ranking = {
+      playerId,
+      playerName: player.name,
+      perceivedRank,
+      timestamp: Date.now()
+    };
+
+    // Add to rankings
+    game.round2Rankings.push(ranking);
+
+    // Create action log entry
+    const action: GameAction = {
+      id: `action-${Date.now()}-${playerId}`,
+      playerId,
+      playerName: player.name,
+      type: 'round2_ranking',
+      content: `I think I am ${perceivedRank}${getOrdinalSuffix(perceivedRank)} highest`,
+      timestamp: Date.now(),
+      round: 2
+    };
+
+    game.actionLog.push(action);
+
+    // Advance to next player's turn
+    const currentPlayerIndex = game.players.findIndex(p => p.id === playerId);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % game.players.length;
+    
+    // Check if all players have declared their ranking
+    if (game.round2Rankings.length >= game.players.length) {
+      // Round 2 complete, advance to Round 3
+      game.roundPhase = 'round3';
+      game.currentTurnPlayerId = game.players[0].id; // Start Round 3 with first player
+    } else {
+      // Set next player's turn
+      game.currentTurnPlayerId = game.players[nextPlayerIndex].id;
+    }
+
+    console.log(`Round 2 ranking by ${player.name}: ${perceivedRank}${getOrdinalSuffix(perceivedRank)} highest`);
+    console.log(`Turn advanced to: ${game.currentTurnPlayerId}`);
+    console.log(`Round phase: ${game.roundPhase}`);
+
+    return game;
+  }
+}
+
+/**
+ * Helper function to get ordinal suffix for numbers
+ */
+function getOrdinalSuffix(n: number): string {
+  if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+  switch (n % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
   }
 } 

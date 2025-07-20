@@ -42,6 +42,7 @@ type SocketHookReturn = {
   reconnectGame: (gameId: string, playerId: string) => void;
   startGame: (gameId: string) => void;
   declareRound1: (gameId: string, playerId: string, seesPair: boolean) => void;
+  declareRound2: (gameId: string, playerId: string, perceivedRank: number) => void;
   getAllGames: () => Promise<{ games: Game[], count: number }>;
   game: Game | null;
   playerId: string | null;
@@ -203,6 +204,13 @@ export const useSocket = (): SocketHookReturn => {
           setGameId(data.game.id);
           setError(null);
         });
+        
+        socketInstance.on('round2_ranking_made', (data: { game: Game, ranking: { playerId: string, playerName: string, perceivedRank: number, timestamp: number } }) => {
+          console.log('Round 2 ranking made:', data);
+          setGame(data.game);
+          setGameId(data.game.id);
+          setError(null);
+        });
 
         // Save socket instance
         setSocket(socketInstance);
@@ -304,6 +312,17 @@ export const useSocket = (): SocketHookReturn => {
       setError('Socket not connected');
     }
   }, [socket, connected]);
+  
+  // Function to make a Round 2 ranking declaration
+  const declareRound2 = useCallback((gameId: string, playerId: string, perceivedRank: number) => {
+    if (socket && connected) {
+      console.log('🎯 useSocket.declareRound2:', { gameId, playerId, perceivedRank });
+      socket.emit('declare_round2', { gameId, playerId, perceivedRank });
+    } else {
+      console.log('🎯 useSocket.declareRound2: Socket not connected!', { socket: !!socket, connected });
+      setError('Socket not connected');
+    }
+  }, [socket, connected]);
 
   // Function to get all active games (admin/debug feature)
   const getAllGames = useCallback((): Promise<{ games: Game[], count: number }> => {
@@ -331,6 +350,7 @@ export const useSocket = (): SocketHookReturn => {
     reconnectGame,
     startGame,
     declareRound1,
+    declareRound2,
     getAllGames,
     game,
     playerId,

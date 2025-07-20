@@ -19,6 +19,7 @@ const GamePlayPage: React.FC = () => {
     reconnectGame,
     setPlayerIdManually,
     declareRound1,
+    declareRound2,
   } = useSocket();
   
   // Effect to handle reconnection or redirection
@@ -158,9 +159,14 @@ const GamePlayPage: React.FC = () => {
     // Handle Round 1 declarations
     if (action.type === 'pair' && game.roundPhase === 'round1') {
       console.log('🎯 Making Round 1 declaration:', { seesPair: action.value });
-      declareRound1(gameId, playerId, action.value);
+      declareRound1(gameId, playerId, action.value as boolean);
     }
-    // TODO: Handle Round 2 and 3 actions
+    // Handle Round 2 ranking declarations
+    else if (action.type === 'perceivedRank' && game.roundPhase === 'round2') {
+      console.log('🎯 Making Round 2 ranking:', { perceivedRank: action.value });
+      declareRound2(gameId, playerId, Number(action.value));
+    }
+    // TODO: Handle Round 3 actions
     else {
       console.log('🎯 Action type not implemented yet:', action.type);
     }
@@ -274,13 +280,36 @@ const GamePlayPage: React.FC = () => {
                   players={boardPlayers}
                   currentRound={game.roundPhase === 'round1' ? 1 : game.roundPhase === 'round2' ? 2 : game.roundPhase === 'round3' ? 3 : game.round}
                   currentTurnPlayerId={currentTurnPlayerId}
-                  actionLog={actionLog.map(action => ({
-                    playerId: action.playerId,
-                    playerName: action.playerName,
-                    round: action.round,
-                    type: action.type === 'round1_declaration' ? 'pair' as const : action.type as 'pair' | 'perceivedRank' | 'guess',
-                    value: action.type === 'round1_declaration' ? action.content.includes('see a pair') : action.content
-                  }))}
+                  actionLog={actionLog.map(action => {
+                    if (action.type === 'round1_declaration') {
+                      return {
+                        playerId: action.playerId,
+                        playerName: action.playerName,
+                        round: action.round,
+                        type: 'pair' as const,
+                        value: action.content.includes('see a pair')
+                      };
+                    } else if (action.type === 'round2_ranking') {
+                      // Extract the rank number from content like "I think I am 2nd highest"
+                      const rankMatch = action.content.match(/I think I am (\d+)/);
+                      const rank = rankMatch ? rankMatch[1] : action.content;
+                      return {
+                        playerId: action.playerId,
+                        playerName: action.playerName,
+                        round: action.round,
+                        type: 'perceivedRank' as const,
+                        value: rank
+                      };
+                    } else {
+                      return {
+                        playerId: action.playerId,
+                        playerName: action.playerName,
+                        round: action.round,
+                        type: action.type as 'pair' | 'perceivedRank' | 'guess',
+                        value: action.content
+                      };
+                    }
+                  })}
                   selfPlayerId={playerId || ''}
                   roundState={roundState}
                   onAction={handleAction}

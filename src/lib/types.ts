@@ -31,6 +31,16 @@ export interface Round1Declaration {
 }
 
 /**
+ * Represents a Round 2 ranking declaration by a player
+ */
+export interface Round2Ranking {
+  playerId: string;
+  playerName: string;
+  perceivedRank: number;
+  timestamp: number;
+}
+
+/**
  * Represents an action taken during the game
  */
 export interface GameAction {
@@ -55,6 +65,7 @@ export interface Game {
   gameState: GameState;
   currentTurnPlayerId?: string;
   round1Declarations: Round1Declaration[];
+  round2Rankings: Round2Ranking[];
   actionLog: GameAction[];
   roundPhase: 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete';
 }
@@ -76,4 +87,13 @@ export interface Round1DeclarationPayload {
   gameId: string;
   playerId: string;
   seesPair: boolean;
+}
+
+/**
+ * Socket event payload for Round 2 rankings
+ */
+export interface Round2RankingPayload {
+  gameId: string;
+  playerId: string;
+  perceivedRank: number;
 } 

@@ -112,6 +112,7 @@ export function createGame(playerNames: string[]): Game {
     gameState: initialGameState,
     currentTurnPlayerId: players.length > 0 ? players[0].id : undefined,
     round1Declarations: [],
+    round2Rankings: [],
     actionLog: [],
     roundPhase: initialRoundPhase as 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete'
   };
@@ -155,6 +156,7 @@ export function restartGame(game: Game): Game {
     gameState: GameState.PLAYING,
     currentTurnPlayerId: players[newStartingPlayerIndex]?.id,
     round1Declarations: [],
+    round2Rankings: [],
     actionLog: [],
     roundPhase: 'round1'
   };

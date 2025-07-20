@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io';
 import type { Server as HTTPServer } from 'http';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Round1DeclarationPayload } from '../../lib/types';
+import { Round1DeclarationPayload, Round2RankingPayload } from '../../lib/types';
 import { GameSessionManager } from '../../lib/gameSessionManager';
 import { SocketPlayerMap } from '../../lib/socketUtils';
 
@@ -442,6 +442,48 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       io.to(gameId).emit('game_state_update', updatedGame);
       
       console.log(`Round 1 declaration processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
+    });
+    
+    // Handle Round 2 ranking declarations
+    socket.on('declare_round2', ({ gameId, playerId, perceivedRank }: Round2RankingPayload) => {
+      console.log(`Round 2 ranking from ${playerId} in game ${gameId}: ${perceivedRank}`);
+      
+      // Validate game exists
+      if (!gameSessionManager.gameExists(gameId)) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+      
+      // Validate player is in game and it's their turn
+      const playerInfo = socketPlayerMap.getPlayerInfo(socket.id);
+      if (!playerInfo || playerInfo.playerId !== playerId || playerInfo.gameId !== gameId) {
+        socket.emit('error', { message: 'Invalid player or not your turn' });
+        return;
+      }
+      
+      // Process the ranking declaration
+      const updatedGame = gameSessionManager.handleRound2Ranking(gameId, playerId, perceivedRank);
+      
+      if (!updatedGame) {
+        socket.emit('error', { message: 'Invalid ranking declaration or not your turn' });
+        return;
+      }
+      
+      // Broadcast the updated game state to all players in the room
+      io.to(gameId).emit('round2_ranking_made', {
+        game: updatedGame,
+        ranking: {
+          playerId,
+          playerName: updatedGame.players.find(p => p.id === playerId)?.name,
+          perceivedRank,
+          timestamp: Date.now()
+        }
+      });
+      
+      // Also send general game state update
+      io.to(gameId).emit('game_state_update', updatedGame);
+      
+      console.log(`Round 2 ranking processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
     });
   });
   
