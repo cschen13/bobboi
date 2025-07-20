@@ -116,8 +116,9 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
                 className={`w-full p-4 rounded-lg font-bold text-lg transition-colors ${
                   !connected || !playerName.trim() || !(gameIdInput || urlGameId)
                     ? 'bg-gray-200 text-gray-500'
-                    : 'bg-[#651c1d] text-white hover:bg-[#7a2324]'
+                    : 'bg-[#651c1d] hover:bg-[#7a2324]'
                 }`}
+                style={!connected || !playerName.trim() || !(gameIdInput || urlGameId) ? {} : { color: '#ffffff' }}
               >
                 Join Game
               </button>

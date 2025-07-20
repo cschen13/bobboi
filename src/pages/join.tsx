@@ -161,7 +161,8 @@ const JoinPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isJoining}
-                    className="w-full bg-[#651c1d] hover:bg-[#7a2324] text-white py-4 rounded-lg font-bold text-lg transition-colors shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    className="w-full bg-[#651c1d] hover:bg-[#7a2324] py-4 rounded-lg font-bold text-lg transition-colors shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    style={{ color: '#ffffff' }}
                   >
                     {isJoining ? (
                       <div className="flex items-center justify-center">

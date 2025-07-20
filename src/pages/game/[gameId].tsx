@@ -191,8 +191,9 @@ const GameLobbyPage: React.FC = () => {
                 className={`w-full py-3 rounded-lg font-bold text-lg transition-colors mt-2 ${
                   game.players.length < 2
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                    : 'bg-[#651c1d] text-white hover:bg-[#7a2324] shadow-lg'
+                    : 'bg-[#651c1d] hover:bg-[#7a2324] shadow-lg'
                 }`}
+                style={game.players.length < 2 ? {} : { color: '#ffffff' }}
               >
                 {game.players.length < 2 
                   ? 'Need at least 2 players to start' 

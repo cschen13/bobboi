@@ -96,7 +96,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
         </div>
         <button
           type="submit"
-          className="bg-[#651c1d] hover:bg-[#7a2324] text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-[#651c1d] hover:bg-[#7a2324] rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{ color: '#ffffff' }}
           disabled={!isMyTurn}
         >
           Submit
@@ -127,7 +128,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
         </div>
         <button
           type="submit"
-          className="bg-[#651c1d] hover:bg-[#7a2324] text-white rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-[#651c1d] hover:bg-[#7a2324] rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{ color: '#ffffff' }}
           disabled={!isMyTurn || !guessedRank.trim()}
         >
           Submit
