@@ -122,7 +122,7 @@ const GamePlayPage: React.FC = () => {
         <link rel="icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
       </Head>
-      <div className="min-h-screen flex flex-col bg-[#f2bf27]">
+      <div className="min-h-screen flex flex-col bg-[#f2bf27] w-full">
         {/* Header */}
         <header className="w-full bg-[#f2bf27] py-4 px-4 flex items-center justify-between">
           <div className="flex items-center">
@@ -155,8 +155,8 @@ const GamePlayPage: React.FC = () => {
           </div>
         </header>
         
-        <main className="flex-grow px-4 py-8">
-          <div className="w-full max-w-6xl mx-auto">
+        <main className="flex-grow">
+          <div className="w-full max-w-2xl mx-auto px-4 py-6">
             {error && (
               <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg border border-red-200">
                 <p className="font-bold">Error:</p>
@@ -164,9 +164,9 @@ const GamePlayPage: React.FC = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="flex flex-col lg:flex-row gap-6">
               {/* Game info panel */}
-              <div className="lg:col-span-1">
+              <div className="lg:w-64 flex-shrink-0">
                 <div className="bg-white rounded-xl shadow-xl overflow-hidden">
                   <div className="p-4 border-b border-[#f2bf27]">
                     <h2 className="font-bold text-lg text-[#651c1d] mb-2">Game Info</h2>
@@ -216,7 +216,7 @@ const GamePlayPage: React.FC = () => {
               </div>
               
               {/* Game board */}
-              <div className="lg:col-span-3">
+              <div className="flex-1 min-w-0">
                 <GameBoard
                   players={boardPlayers}
                   currentRound={game.round}

@@ -163,7 +163,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
         {/* Player Hands */}
         <section>
           <h3 className="text-md font-semibold mb-3 text-[#651c1d]">Player Cards</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {players.map((player) => {
               const isCurrentTurn = player.id === currentTurnPlayerId;
               return (
