@@ -118,10 +118,38 @@ const GamePlayPage: React.FC = () => {
       cardRank: p.card?.rank
     });
     
+    // Determine if we should reveal this player's card to themselves
+    let cardDisplay = '?';
+    
+    if (p.id === playerId) {
+      // This is the current player viewing their own card
+      if (game.roundPhase === 'round3') {
+        // In Round 3, check if this player has made their guess
+        const hasGuessed = game.round3Guesses?.some(guess => guess.playerId === p.id);
+        
+        if (hasGuessed && p.card) {
+          // Reveal the actual card after they've guessed
+          cardDisplay = p.card.rank;
+        } else {
+          // Haven't guessed yet, keep it hidden
+          cardDisplay = '?';
+        }
+      } else if (game.roundPhase === 'revealing' || game.roundPhase === 'complete') {
+        // During revealing phase, show all cards
+        cardDisplay = p.card ? p.card.rank : '?';
+      } else {
+        // In Round 1 and 2, always hide own card
+        cardDisplay = '?';
+      }
+    } else {
+      // Other players' cards are always visible
+      cardDisplay = p.card ? p.card.rank : '?';
+    }
+    
     return {
       id: p.id,
       name: p.name,
-      card: p.id === playerId ? '?' : (p.card ? p.card.rank : '?'),
+      card: cardDisplay,
     };
   });
 

@@ -183,7 +183,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                   </span>
                   <div className="w-12 h-16 bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 rounded-lg shadow-inner flex items-center justify-center">
                     <span className="text-xl font-bold text-[#651c1d]">
-                      {player.id === selfPlayerId ? '?' : player.card}
+                      {player.card}
                     </span>
                   </div>
                 </div>
