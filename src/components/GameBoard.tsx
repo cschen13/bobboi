@@ -105,36 +105,35 @@ const GameBoard: React.FC<GameBoardProps> = ({
       </form>
     );
   } else if (roundState.round === 3) {
+    const cardRanks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    
     actionUI = (
-      <form
-        className="flex gap-3 items-center flex-wrap"
-        onSubmit={e => {
-          e.preventDefault();
-          if (isMyTurn && guessedRank.trim()) onAction({ type: 'guess', value: guessedRank.trim().toUpperCase() });
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <label htmlFor="guess-rank" className="text-sm font-medium text-[#651c1d]">Your Guess:</label>
-          <input
-            id="guess-rank"
-            className="rounded-lg border border-[#f2bf27]/50 px-3 py-2 w-20 text-center uppercase font-mono text-[#651c1d] focus:outline-none focus:ring-2 focus:ring-[#f2bf27]"
-            type="text"
-            maxLength={2}
-            placeholder="A, 2...K"
-            value={guessedRank}
-            disabled={!isMyTurn}
-            onChange={e => setGuessedRank(e.target.value)}
-          />
+      <div className="space-y-3">
+        <div>
+          <label className="text-sm font-medium text-[#651c1d] block mb-2">Select your card rank:</label>
+          <div className="grid grid-cols-7 gap-1">
+            {cardRanks.map(rank => (
+              <button
+                key={rank}
+                type="button"
+                disabled={!isMyTurn}
+                onClick={() => {
+                  if (isMyTurn) {
+                    onAction({ type: 'guess', value: rank });
+                  }
+                }}
+                className={`w-8 h-8 rounded border-2 font-bold text-xs transition-all duration-200 ${
+                  !isMyTurn 
+                    ? 'bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed'
+                    : 'bg-white border-[#f2bf27] text-[#651c1d] hover:bg-[#f2bf27]/20 hover:border-[#651c1d] hover:shadow-sm'
+                }`}
+              >
+                {rank}
+              </button>
+            ))}
+          </div>
         </div>
-        <button
-          type="submit"
-          className="bg-[#651c1d] hover:bg-[#7a2324] rounded-lg px-6 py-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          style={{ color: '#ffffff' }}
-          disabled={!isMyTurn || !guessedRank.trim()}
-        >
-          Submit
-        </button>
-      </form>
+      </div>
     );
   }
 
