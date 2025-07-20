@@ -80,7 +80,7 @@ export const useSocket = (): SocketHookReturn => {
         // Create socket connection with proper configuration
         const socketInstance = io('/', {
           path: '/api/socket',
-          transports: ['polling'], // Force polling for Vercel compatibility
+          transports: ['websocket', 'polling'], // Prefer WebSocket for self-hosting
           reconnectionAttempts: 10,
           reconnectionDelay: 2000,
           reconnectionDelayMax: 5000,

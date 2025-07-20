@@ -34,8 +34,8 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       methods: ['GET', 'POST'],
       allowedHeaders: ['content-type'],
     },
-    // Force polling for Vercel serverless compatibility
-    transports: ['polling'],
+    // Support both transports for self-hosting
+    transports: ['polling', 'websocket'],
     pingTimeout: 60000,
     pingInterval: 25000,
   });
