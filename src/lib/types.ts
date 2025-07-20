@@ -69,6 +69,7 @@ export interface Game {
   round3Guesses: Round3Guess[];
   actionLog: GameAction[];
   roundPhase: 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete';
+  gameResult?: GameResult;
 }
 
 /**
@@ -118,4 +119,32 @@ export interface Round3GuessPayload {
   gameId: string;
   playerId: string;
   guessedRank: string;
+}
+
+/**
+ * Represents the result for a single player at game end
+ */
+export interface PlayerResult {
+  playerId: string;
+  playerName: string;
+  actualCard: { rank: string; suit: string; value: number };
+  guessedRank: string;
+  isCorrect: boolean;
+}
+
+/**
+ * Represents the overall game result
+ */
+export interface GameResult {
+  isWin: boolean;
+  playerResults: PlayerResult[];
+  timestamp: number;
+}
+
+/**
+ * Socket event payload for game over
+ */
+export interface GameOverPayload {
+  gameId: string;
+  result: GameResult;
 } 

@@ -1,4 +1,4 @@
-import { Game, Player, GameState, Round1Declaration, Round2Ranking, Round3Guess, GameAction } from './types';
+import { Game, Player, GameState, Round1Declaration, Round2Ranking, Round3Guess, GameAction, GameResult, PlayerResult } from './types';
 import { createGame, restartGame, shuffleDeck, createDeck } from './game';
 
 /**
@@ -168,6 +168,7 @@ export class GameSessionManager {
     game.round2Rankings = [];
     game.round3Guesses = [];
     game.actionLog = [];
+    game.gameResult = undefined;
     
     // Create and shuffle a new deck
     const deck = shuffleDeck(createDeck());
@@ -440,8 +441,9 @@ export class GameSessionManager {
     
     // Check if all players have made their guesses
     if (game.round3Guesses.length >= game.players.length) {
-      // Round 3 complete, move to revealing phase
-      game.roundPhase = 'revealing';
+      // Round 3 complete, calculate game outcome
+      game.gameResult = this.calculateGameOutcome(game);
+      game.roundPhase = 'complete';
       game.currentTurnPlayerId = undefined; // No more turns needed
     } else {
       // Set next player's turn
@@ -453,6 +455,58 @@ export class GameSessionManager {
     console.log(`Round phase: ${game.roundPhase}`);
 
     return game;
+  }
+
+  /**
+   * Calculate the final game outcome based on all Round 3 guesses
+   * @param game The game object with completed Round 3 guesses
+   * @returns GameResult with win/loss and individual player results
+   */
+  private calculateGameOutcome(game: Game): GameResult {
+    const playerResults: PlayerResult[] = [];
+    let allCorrect = true;
+
+    // Create results for each player based on their Round 3 guess
+    for (const player of game.players) {
+      const guess = game.round3Guesses.find(g => g.playerId === player.id);
+      
+      if (!guess || !player.card) {
+        // This shouldn't happen if the game logic is correct, but handle it
+        console.error(`Missing guess or card for player ${player.id}`);
+        allCorrect = false;
+        continue;
+      }
+
+      const isCorrect = guess.guessedRank === player.card.rank;
+      if (!isCorrect) {
+        allCorrect = false;
+      }
+
+      playerResults.push({
+        playerId: player.id,
+        playerName: player.name,
+        actualCard: {
+          rank: player.card.rank,
+          suit: player.card.suit,
+          value: player.card.value
+        },
+        guessedRank: guess.guessedRank,
+        isCorrect
+      });
+    }
+
+    const result: GameResult = {
+      isWin: allCorrect,
+      playerResults,
+      timestamp: Date.now()
+    };
+
+    console.log(`Game outcome calculated: ${allCorrect ? 'WIN' : 'LOSS'}`);
+    console.log('Player results:', playerResults.map(pr => 
+      `${pr.playerName}: guessed ${pr.guessedRank}, actual ${pr.actualCard.rank} - ${pr.isCorrect ? 'CORRECT' : 'WRONG'}`
+    ).join(', '));
+
+    return result;
   }
 }
 

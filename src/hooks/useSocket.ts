@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { Game } from '../lib/types';
+import { Game, GameResult } from '../lib/types';
 import { saveGameSession } from '../lib/socketUtils';
 
 type PlayerJoinedEvent = {
@@ -49,6 +49,7 @@ type SocketHookReturn = {
   playerId: string | null;
   gameId: string | null;
   error: string | null;
+  gameResult: GameResult | null;
   setPlayerIdManually: (playerId: string | null) => void;
 };
 
@@ -59,6 +60,7 @@ export const useSocket = (): SocketHookReturn => {
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
   // Initialize socket connection
@@ -172,6 +174,7 @@ export const useSocket = (): SocketHookReturn => {
           console.log('Game restarted:', gameData);
           setGame(gameData);
           setGameId(gameData.id);
+          setGameResult(null); // Reset game result on restart
           setError(null);
         });
 
@@ -180,6 +183,7 @@ export const useSocket = (): SocketHookReturn => {
           setGame(null);
           setGameId(null);
           setPlayerId(null);
+          setGameResult(null);
           setError(null);
         });
         
@@ -189,6 +193,7 @@ export const useSocket = (): SocketHookReturn => {
           console.log('🎮 Setting game state in useSocket...');
           setGame(data.game);
           setGameId(data.game.id);
+          setGameResult(null); // Reset game result on new game start
           setError(null);
         });
         
@@ -217,6 +222,14 @@ export const useSocket = (): SocketHookReturn => {
           console.log('Round 3 guess made:', data);
           setGame(data.game);
           setGameId(data.game.id);
+          setError(null);
+        });
+        
+        socketInstance.on('game_over', (data: { game: Game, result: GameResult }) => {
+          console.log('Game over:', data);
+          setGame(data.game);
+          setGameId(data.game.id);
+          setGameResult(data.result);
           setError(null);
         });
 
@@ -376,6 +389,7 @@ export const useSocket = (): SocketHookReturn => {
     playerId,
     gameId,
     error,
+    gameResult,
     setPlayerIdManually: setPlayerId,
   };
 }; 

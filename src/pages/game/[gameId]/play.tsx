@@ -5,6 +5,7 @@ import { useSocket } from '../../../hooks/useSocket';
 import { GameState, GameAction } from '../../../lib/types';
 import { getSavedGameSession } from '../../../lib/socketUtils';
 import GameBoard, { RoundState } from '../../../components/GameBoard';
+import GameOver from '../../../components/GameOver';
 
 const GamePlayPage: React.FC = () => {
   const router = useRouter();
@@ -16,7 +17,9 @@ const GamePlayPage: React.FC = () => {
     gameId,
     playerId,
     error,
+    gameResult,
     reconnectGame,
+    restartGame,
     setPlayerIdManually,
     declareRound1,
     declareRound2,
@@ -208,6 +211,19 @@ const GamePlayPage: React.FC = () => {
     }
   };
 
+  // Handle Play Again
+  const handlePlayAgain = () => {
+    if (gameId) {
+      console.log('🔄 Restarting game:', gameId);
+      restartGame(gameId);
+    }
+  };
+
+  // Handle Exit Game
+  const handleExitGame = () => {
+    router.push('/');
+  };
+
   return (
     <>
       <Head>
@@ -365,6 +381,15 @@ const GamePlayPage: React.FC = () => {
             </div>
           </div>
         </main>
+        
+        {/* Game Over Modal */}
+        {gameResult && (
+          <GameOver
+            result={gameResult}
+            onPlayAgain={handlePlayAgain}
+            onExitGame={handleExitGame}
+          />
+        )}
       </div>
     </>
   );

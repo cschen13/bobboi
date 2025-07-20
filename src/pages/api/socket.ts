@@ -530,6 +530,15 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       // Also send general game state update
       io.to(gameId).emit('game_state_update', updatedGame);
       
+      // If game is complete, emit game over event
+      if (updatedGame.roundPhase === 'complete' && updatedGame.gameResult) {
+        console.log(`Game completed! Emitting game_over event. Result: ${updatedGame.gameResult.isWin ? 'WIN' : 'LOSS'}`);
+        io.to(gameId).emit('game_over', {
+          game: updatedGame,
+          result: updatedGame.gameResult
+        });
+      }
+      
       console.log(`Round 3 guess processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
     });
   });

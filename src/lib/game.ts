@@ -115,7 +115,8 @@ export function createGame(playerNames: string[]): Game {
     round2Rankings: [],
     round3Guesses: [],
     actionLog: [],
-    roundPhase: initialRoundPhase as 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete'
+    roundPhase: initialRoundPhase as 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete',
+    gameResult: undefined
   };
   
   return game;
@@ -160,7 +161,8 @@ export function restartGame(game: Game): Game {
     round2Rankings: [],
     round3Guesses: [],
     actionLog: [],
-    roundPhase: 'round1'
+    roundPhase: 'round1',
+    gameResult: undefined
   };
   
   return newGame;
