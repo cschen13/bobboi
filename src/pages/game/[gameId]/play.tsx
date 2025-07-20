@@ -249,9 +249,6 @@ const GamePlayPage: React.FC = () => {
           </div>
           <div className="flex items-center">
             <div className="hidden md:flex items-center mr-6">
-              <div className="h-8 w-8 rounded-full bg-[#651c1d] flex items-center justify-center mr-2 font-bold" style={{ color: '#ffffff' }}>
-                {currentPlayer?.name.charAt(0).toUpperCase()}
-              </div>
               <span className="text-[#651c1d] font-medium">{currentPlayer?.name}</span>
             </div>
             <button 

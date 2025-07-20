@@ -173,9 +173,6 @@ const GameLobbyPage: React.FC = () => {
                     key={player.id} 
                     className="flex items-center gap-3 p-2 rounded-lg border border-[#f2bf27]/20 bg-[#f2bf27]/10"
                   >
-                    <div className="h-8 w-8 rounded-full bg-[#f2bf27] flex items-center justify-center text-[#651c1d] font-bold">
-                      {player.name.charAt(0).toUpperCase()}
-                    </div>
                     <span className={`text-[#651c1d] ${player.id === playerId ? 'font-bold' : ''}`}>
                       {player.name} {player.id === playerId ? '(You)' : ''}
                     </span>

@@ -65,9 +65,6 @@ const GameOver: React.FC<GameOverProps> = ({ result, onPlayAgain, onExitGame }) 
                   <tr key={player.playerId} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="border-2 border-[#651c1d] px-4 py-4 bg-white">
                       <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-[#f2bf27] flex items-center justify-center mr-3 text-[#651c1d] font-black text-lg border-2 border-[#651c1d]">
-                          {player.playerName.charAt(0).toUpperCase()}
-                        </div>
                         <span className="font-black text-[#651c1d] text-xl">{player.playerName}</span>
                       </div>
                     </td>
