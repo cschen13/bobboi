@@ -1,5 +1,5 @@
 import { Game, Player, GameState } from './types';
-import { createGame, restartGame } from './game';
+import { createGame, restartGame, shuffleDeck, createDeck } from './game';
 
 /**
  * GameSessionManager class to manage all active game sessions in memory
@@ -146,6 +146,38 @@ export class GameSessionManager {
     if (!game) return null;
     
     game.gameState = gameState;
+    return game;
+  }
+
+  /**
+   * Start a game by changing state to PLAYING and dealing cards
+   * @param gameId The ID of the game to start
+   * @returns The updated game or null if not found
+   */
+  startGame(gameId: string): Game | null {
+    const game = this.games.get(gameId);
+    if (!game) return null;
+    
+    // Change state to PLAYING
+    game.gameState = GameState.PLAYING;
+    
+    // Create and shuffle a new deck
+    const deck = shuffleDeck(createDeck());
+    game.deck = deck;
+    
+    // Deal one card to each player
+    for (let i = 0; i < game.players.length && i < deck.length; i++) {
+      const card = deck.shift(); // Take from the top of the deck
+      if (card) {
+        game.players[i].card = card;
+      }
+    }
+    
+    console.log(`Cards dealt to ${game.players.length} players in game ${gameId}`);
+    game.players.forEach(player => {
+      console.log(`Player ${player.name} (${player.id}) got card: ${player.card?.rank} of ${player.card?.suit}`);
+    });
+    
     return game;
   }
   

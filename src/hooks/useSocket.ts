@@ -46,6 +46,7 @@ type SocketHookReturn = {
   playerId: string | null;
   gameId: string | null;
   error: string | null;
+  setPlayerIdManually: (playerId: string | null) => void;
 };
 
 export const useSocket = (): SocketHookReturn => {
@@ -130,9 +131,21 @@ export const useSocket = (): SocketHookReturn => {
           saveGameSession(data.gameId, data.playerId, data.game.players.find(p => p.id === data.playerId)?.name || '');
         });
         
+        socketInstance.on('reconnect_success', (data: { game: Game, playerId: string }) => {
+          console.log('🔄 RECONNECT_SUCCESS: Reconnection successful:', data);
+          console.log('🔄 RECONNECT_SUCCESS: Setting playerId to:', data.playerId);
+          setGame(data.game);
+          setGameId(data.game.id);
+          setPlayerId(data.playerId);
+          setError(null);
+          
+          // Save session with the reconnected player info
+          const playerName = data.game.players.find(p => p.id === data.playerId)?.name || '';
+          saveGameSession(data.game.id, data.playerId, playerName);
+        });
+
         socketInstance.on('game_state', (gameData: Game) => {
-          console.log('🔄 RECONNECT: Game state received:', gameData);
-          console.log('🔄 RECONNECT: Game state is:', gameData.gameState);
+          console.log('🔄 RECONNECT: Game state received (legacy):', gameData);
           setGame(gameData);
           setGameId(gameData.id);
           setError(null);
@@ -254,8 +267,10 @@ export const useSocket = (): SocketHookReturn => {
   // Function to reconnect to a game
   const reconnectGame = useCallback((gameId: string, playerId: string) => {
     if (socket && connected) {
+      console.log('🔄 useSocket.reconnectGame: Sending reconnect_game event:', { gameId, playerId });
       socket.emit('reconnect_game', { gameId, playerId });
     } else {
+      console.log('🔄 useSocket.reconnectGame: Socket not connected!', { socket: !!socket, connected });
       setError('Socket not connected');
     }
   }, [socket, connected]);
@@ -301,5 +316,6 @@ export const useSocket = (): SocketHookReturn => {
     playerId,
     gameId,
     error,
+    setPlayerIdManually: setPlayerId,
   };
 }; 

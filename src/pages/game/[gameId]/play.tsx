@@ -18,6 +18,7 @@ const GamePlayPage: React.FC = () => {
     playerId,
     error,
     reconnectGame,
+    setPlayerIdManually,
   } = useSocket();
   
   // Effect to handle reconnection or redirection
@@ -38,9 +39,22 @@ const GamePlayPage: React.FC = () => {
       
       if (savedSession) {
         console.log('🎲 PLAY PAGE: Found saved session:', savedSession);
+        console.log('🎲 PLAY PAGE: Session details:', {
+          sessionGameId: savedSession.gameId,
+          sessionPlayerId: savedSession.playerId,
+          sessionPlayerName: savedSession.playerName,
+          urlGameId: gameIdString
+        });
         if (savedSession.gameId === gameIdString) {
-          console.log('🎲 PLAY PAGE: Reconnecting to game...');
+          console.log('🎲 PLAY PAGE: Reconnecting to game with:', { gameId: savedSession.gameId, playerId: savedSession.playerId });
           reconnectGame(savedSession.gameId, savedSession.playerId);
+          
+          // WORKAROUND: Set playerId from saved session since server doesn't send it back
+          // This is a temporary fix until server changes take effect
+          setTimeout(() => {
+            console.log('🎲 PLAY PAGE: Setting playerId from saved session as workaround:', savedSession.playerId);
+            setPlayerIdManually(savedSession.playerId);
+          }, 1000);
         } else {
           console.log('🎲 PLAY PAGE: Session mismatch, redirecting to join');
           router.replace(`/join?gameId=${gameIdString}`);
@@ -82,14 +96,32 @@ const GamePlayPage: React.FC = () => {
   }
   
   // Get current player
+  console.log('🔍 DEBUG: useSocket data:', { 
+    playerId, 
+    gameId, 
+    gameObject: game,
+    gameState: game?.gameState,
+    players: game?.players 
+  });
   const currentPlayer = game.players.find(p => p.id === playerId);
 
   // Map players to GameBoard format
-  const boardPlayers = game.players.map(p => ({
-    id: p.id,
-    name: p.name,
-    card: p.card ? p.card.rank : '?',
-  }));
+  const boardPlayers = game.players.map(p => {
+    console.log('🃏 Player mapping:', {
+      playerId: p.id,
+      playerName: p.name,
+      currentPlayerId: playerId,
+      isCurrentPlayer: p.id === playerId,
+      cardData: p.card,
+      cardRank: p.card?.rank
+    });
+    
+    return {
+      id: p.id,
+      name: p.name,
+      card: p.id === playerId ? '?' : (p.card ? p.card.rank : '?'),
+    };
+  });
 
   // Determine current turn player ID
   const currentTurnPlayerId = game.players[game.turn]?.id || '';

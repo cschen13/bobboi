@@ -348,7 +348,7 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       socket.join(gameId);
       
       // Send the current game state to the reconnected player
-      socket.emit('game_state', game);
+      socket.emit('reconnect_success', { game, playerId });
       
       console.log(`Player ${playerId} reconnected to game: ${gameId}`);
     });
@@ -386,8 +386,8 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
         return;
       }
       
-      // Update game state to PLAYING
-      const updatedGame = gameSessionManager.updateGameState(gameId, GameState.PLAYING);
+      // Start the game (change state to PLAYING and deal cards)
+      const updatedGame = gameSessionManager.startGame(gameId);
       if (!updatedGame) {
         socket.emit('error', { message: 'Failed to start game' });
         return;
