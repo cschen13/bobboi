@@ -137,8 +137,10 @@ export function restartGame(game: Game): Game {
     card: null
   } as Player));
   
-  // Calculate the new starting player (rotate)
+  // Calculate the new starting player (rotate from current starting player)
   const newStartingPlayerIndex = (game.turn + 1) % game.players.length;
+  
+  console.log(`Restarting game: Current turn was ${game.turn} (${game.players[game.turn]?.name}), new starting player will be ${newStartingPlayerIndex} (${players[newStartingPlayerIndex]?.name})`);
   
   // Deal one card to each player
   for (let i = 0; i < players.length && i < deck.length; i++) {

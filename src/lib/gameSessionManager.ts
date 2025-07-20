@@ -56,8 +56,13 @@ export class GameSessionManager {
     const game = this.games.get(gameId);
     if (!game) return null;
     
+    console.log(`🔄 RESTART: Before restart - game.turn: ${game.turn}, currentTurnPlayerId: ${game.currentTurnPlayerId}`);
+    
     const newGame = restartGame(game);
     this.games.set(gameId, newGame);
+    
+    console.log(`🔄 RESTART: After restart - newGame.turn: ${newGame.turn}, currentTurnPlayerId: ${newGame.currentTurnPlayerId}`);
+    console.log(`🔄 RESTART: New starting player should be: ${newGame.players[newGame.turn]?.name}`);
     
     return newGame;
   }
@@ -163,12 +168,14 @@ export class GameSessionManager {
     
     // Initialize Round 1 state
     game.roundPhase = 'round1';
-    game.currentTurnPlayerId = game.players[0]?.id;
+    game.currentTurnPlayerId = game.players[game.turn]?.id; // Use the turn index instead of always [0]
     game.round1Declarations = [];
     game.round2Rankings = [];
     game.round3Guesses = [];
     game.actionLog = [];
     game.gameResult = undefined;
+    
+    console.log(`Game started: Round 1 starting with player ${game.turn} (${game.players[game.turn]?.name})`);
     
     // Create and shuffle a new deck
     const deck = shuffleDeck(createDeck());
@@ -282,7 +289,7 @@ export class GameSessionManager {
     if (game.round1Declarations.length >= game.players.length) {
       // Round 1 complete, advance to Round 2
       game.roundPhase = 'round2';
-      game.currentTurnPlayerId = game.players[0].id; // Start Round 2 with first player
+      game.currentTurnPlayerId = game.players[game.turn].id; // Start Round 2 with the game's starting player
     } else {
       // Set next player's turn
       game.currentTurnPlayerId = game.players[nextPlayerIndex].id;
@@ -362,7 +369,7 @@ export class GameSessionManager {
     if (game.round2Rankings.length >= game.players.length) {
       // Round 2 complete, advance to Round 3
       game.roundPhase = 'round3';
-      game.currentTurnPlayerId = game.players[0].id; // Start Round 3 with first player
+      game.currentTurnPlayerId = game.players[game.turn].id; // Start Round 3 with the game's starting player
     } else {
       // Set next player's turn
       game.currentTurnPlayerId = game.players[nextPlayerIndex].id;
