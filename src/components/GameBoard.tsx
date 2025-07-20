@@ -39,9 +39,8 @@ const GameBoard: React.FC<GameBoardProps> = ({
   roundState,
   onAction,
 }) => {
-  // Local state for round 2 and 3 inputs
+  // Local state for round 2 inputs
   const [perceivedRank, setPerceivedRank] = useState('1');
-  const [guessedRank, setGuessedRank] = useState('');
 
   const isMyTurn = selfPlayerId === currentTurnPlayerId;
 

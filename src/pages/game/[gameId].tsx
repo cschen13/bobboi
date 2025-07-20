@@ -11,7 +11,6 @@ const GameLobbyPage: React.FC = () => {
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   
   const {
-    socket,
     connected,
     game,
     gameId,
@@ -21,8 +20,6 @@ const GameLobbyPage: React.FC = () => {
     startGame,
   } = useSocket();
   
-  // Check if current player is the creator (first player)
-  const isCreator = game?.players.length ? game.players[0].id === playerId : false;
   
   // Effect to handle reconnection or redirection
   useEffect(() => {

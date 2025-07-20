@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSocket } from '../hooks/useSocket';
-import { generateGameLink, getGameIdFromUrl } from '../lib/socketUtils';
+import { getGameIdFromUrl } from '../lib/socketUtils';
 
 interface GameLobbyProps {
   initialMode?: 'create' | 'join';
@@ -11,7 +11,6 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
   const router = useRouter();
   const [playerName, setPlayerName] = useState('');
   const [gameIdInput, setGameIdInput] = useState('');
-  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const [activeMode, setActiveMode] = useState<'create' | 'join'>(initialMode);
   
   const {
@@ -47,15 +46,6 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
     }
   };
   
-  // Copy game link to clipboard
-  const copyGameLink = () => {
-    if (gameId) {
-      const link = generateGameLink(gameId);
-      navigator.clipboard.writeText(link);
-      setShowCopiedMessage(true);
-      setTimeout(() => setShowCopiedMessage(false), 2000);
-    }
-  };
   
   // Check if we're in a game
   const isInGame = game !== null && gameId !== null && playerId !== null;
@@ -70,7 +60,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({ initialMode = 'create' }) => {
       {!connected && (
         <div className="mb-4 p-3 bg-[#f2bf27]/20 text-[#651c1d] rounded-lg border border-[#f2bf27]">
           <p className="font-bold">Connecting to server...</p>
-          <p className="text-sm mt-1">This may take a few moments. If it doesn't connect, try refreshing the page.</p>
+          <p className="text-sm mt-1">This may take a few moments. If it doesn&apos;t connect, try refreshing the page.</p>
         </div>
       )}
       

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useSocket } from '../hooks/useSocket';
-import GameLobby from '../components/GameLobby';
 
 const JoinPage: React.FC = () => {
   const router = useRouter();
@@ -177,7 +176,7 @@ const JoinPage: React.FC = () => {
                 
                 <div className="mt-6 text-center">
                   <p className="text-[#651c1d]/80">
-                    Don't have a game code?{' '}
+                    Don&apos;t have a game code?{' '}
                     <button 
                       onClick={() => router.push('/')}
                       className="text-[#651c1d] font-medium hover:underline"

@@ -145,7 +145,7 @@ const GamePlayPage: React.FC = () => {
         cardDisplay = '?';
       }
     } else {
-      // Other players' cards are always visible
+      // Other players cards are always visible
       cardDisplay = p.card ? p.card.rank : '?';
     }
     

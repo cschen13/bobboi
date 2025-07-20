@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import GameLobby from '../components/GameLobby';
-import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -45,7 +44,7 @@ export default function Home() {
             
             <div className="text-center md:text-left order-1 md:order-2">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#651c1d] mb-4 leading-tight" style={{ fontFamily: 'Nunito, sans-serif' }}>
-                San Diego's<br />Favorite Card Game
+                San Diego&apos;s<br />Favorite Card Game
               </h2>
               <p className="text-[#651c1d] text-lg md:text-xl mb-8 max-w-lg">
                 Join friends and family for a delightful game of Bobboi - a cooperative card game for everyone to enjoy.
@@ -65,7 +64,7 @@ export default function Home() {
               <h3 className="text-xl font-bold text-[#651c1d] mb-3">🎯 Objective</h3>
               <p className="text-[#651c1d]">
                 Bobboi is a <strong>cooperative card game</strong> where all players win together or lose together. 
-                Each player gets one card (visible to others, hidden from themselves) and must correctly guess their own card's rank. 
+                Each player gets one card (visible to others, hidden from themselves) and must correctly guess their own card&apos;s rank. 
                 <strong> Everyone must guess correctly to win!</strong>
               </p>
             </div>
@@ -80,7 +79,7 @@ export default function Home() {
                   <h3 className="text-lg font-bold text-[#651c1d]">Pair Detection</h3>
                 </div>
                 <p className="text-sm text-[#651c1d] mb-3">
-                  Going in turn order, each player declares if they see <strong>one pair</strong> among the <em>other players'</em> cards 
+                  Going in turn order, each player declares if they see <strong>one pair</strong> among the <em>other players&apos;</em> cards 
                   that previous players could not have conceivably declared.
                 </p>
                 <div className="bg-[#f2bf27]/20 rounded-lg p-3">
@@ -110,7 +109,7 @@ export default function Home() {
                 </p>
                 <div className="bg-[#f2bf27]/20 rounded-lg p-3">
                   <p className="text-xs text-[#651c1d]">
-                    <strong>Example:</strong> "I think I'm 3rd highest" means you believe two players have higher cards than you.
+                    <strong>Example:</strong> &quot;I think I&apos;m 3rd highest&quot; means you believe two players have higher cards than you.
                   </p>
                 </div>
               </div>
@@ -145,7 +144,7 @@ export default function Home() {
             </div>
             
             <div className="mt-6 text-center text-sm text-[#651c1d]/70">
-              <p>Recommended for 4-6 players • Uses standard 52-card deck • Suits don't matter</p>
+              <p>Recommended for 4-6 players • Uses standard 52-card deck • Suits don&apos;t matter</p>
             </div>
           </div>
         </section>

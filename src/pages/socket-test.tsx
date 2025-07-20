@@ -57,7 +57,7 @@ const SocketTest: React.FC = () => {
   const handlePing = () => {
     if (socket && connected) {
       addLog('Sending ping...');
-      socket.emit('ping', { time: new Date().toISOString() }, (response: any) => {
+      socket.emit('ping', { time: new Date().toISOString() }, (response: unknown) => {
         addLog(`Received pong: ${JSON.stringify(response)}`);
       });
     } else {
