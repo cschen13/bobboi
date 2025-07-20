@@ -307,9 +307,6 @@ const GamePlayPage: React.FC = () => {
                           }`}
                         >
                           <div className="flex items-center">
-                            <div className="h-6 w-6 rounded-full bg-[#f2bf27] flex items-center justify-center mr-2 text-[#651c1d] font-bold text-xs">
-                              {player.name.charAt(0).toUpperCase()}
-                            </div>
                             <span className={`${player.id === playerId ? 'font-bold' : ''} text-[#651c1d] text-sm`}>
                               {player.name} {player.id === playerId ? '(You)' : ''}
                             </span>
