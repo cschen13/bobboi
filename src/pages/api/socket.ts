@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io';
 import type { Server as HTTPServer } from 'http';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Round1DeclarationPayload, Round2RankingPayload } from '../../lib/types';
+import { Round1DeclarationPayload, Round2RankingPayload, Round3GuessPayload } from '../../lib/types';
 import { GameSessionManager } from '../../lib/gameSessionManager';
 import { SocketPlayerMap } from '../../lib/socketUtils';
 
@@ -484,6 +484,53 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       io.to(gameId).emit('game_state_update', updatedGame);
       
       console.log(`Round 2 ranking processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
+    });
+    
+    // Handle Round 3 guess declarations
+    socket.on('declare_round3', ({ gameId, playerId, guessedRank }: Round3GuessPayload) => {
+      console.log(`Round 3 guess from ${playerId} in game ${gameId}: ${guessedRank}`);
+      
+      // Validate game exists
+      if (!gameSessionManager.gameExists(gameId)) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+      
+      // Validate player is in game and it's their turn
+      const playerInfo = socketPlayerMap.getPlayerInfo(socket.id);
+      if (!playerInfo || playerInfo.playerId !== playerId || playerInfo.gameId !== gameId) {
+        socket.emit('error', { message: 'Invalid player or not your turn' });
+        return;
+      }
+      
+      // Process the guess
+      const updatedGame = gameSessionManager.handleRound3Guess(gameId, playerId, guessedRank);
+      
+      if (!updatedGame) {
+        socket.emit('error', { message: 'Invalid guess or not your turn' });
+        return;
+      }
+      
+      // Get the guess that was just made
+      const latestGuess = updatedGame.round3Guesses[updatedGame.round3Guesses.length - 1];
+      
+      // Broadcast the updated game state to all players in the room
+      io.to(gameId).emit('round3_guess_made', {
+        game: updatedGame,
+        guess: {
+          playerId,
+          playerName: updatedGame.players.find(p => p.id === playerId)?.name,
+          guessedRank,
+          actualRank: latestGuess.actualRank,
+          isCorrect: latestGuess.isCorrect,
+          timestamp: Date.now()
+        }
+      });
+      
+      // Also send general game state update
+      io.to(gameId).emit('game_state_update', updatedGame);
+      
+      console.log(`Round 3 guess processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
     });
   });
   

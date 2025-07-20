@@ -66,6 +66,7 @@ export interface Game {
   currentTurnPlayerId?: string;
   round1Declarations: Round1Declaration[];
   round2Rankings: Round2Ranking[];
+  round3Guesses: Round3Guess[];
   actionLog: GameAction[];
   roundPhase: 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete';
 }
@@ -96,4 +97,25 @@ export interface Round2RankingPayload {
   gameId: string;
   playerId: string;
   perceivedRank: number;
+}
+
+/**
+ * Represents a Round 3 guess by a player
+ */
+export interface Round3Guess {
+  playerId: string;
+  playerName: string;
+  guessedRank: string; // The rank they think their own card is (e.g., "A", "K", "Q", "J", "10", "9", etc.)
+  actualRank: string;  // Their actual card rank (revealed after guess)
+  isCorrect: boolean;  // Whether their guess was correct
+  timestamp: number;
+}
+
+/**
+ * Socket event payload for Round 3 guesses
+ */
+export interface Round3GuessPayload {
+  gameId: string;
+  playerId: string;
+  guessedRank: string;
 } 

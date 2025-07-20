@@ -4,7 +4,7 @@ import Head from 'next/head';
 import { useSocket } from '../../../hooks/useSocket';
 import { GameState, GameAction } from '../../../lib/types';
 import { getSavedGameSession } from '../../../lib/socketUtils';
-import GameBoard from '../../../components/GameBoard';
+import GameBoard, { RoundState } from '../../../components/GameBoard';
 
 const GamePlayPage: React.FC = () => {
   const router = useRouter();
@@ -20,6 +20,7 @@ const GamePlayPage: React.FC = () => {
     setPlayerIdManually,
     declareRound1,
     declareRound2,
+    declareRound3,
   } = useSocket();
   
   // Effect to handle reconnection or redirection
@@ -128,7 +129,7 @@ const GamePlayPage: React.FC = () => {
   const currentTurnPlayerId = game.currentTurnPlayerId || game.players[game.turn]?.id || '';
 
   // Derive roundState for GameBoard based on game phase
-  let roundState: { round: number; totalPlayers?: number };
+  let roundState: RoundState;
   if (game.roundPhase === 'round1') {
     roundState = { round: 1 };
   } else if (game.roundPhase === 'round2') {
@@ -139,8 +140,11 @@ const GamePlayPage: React.FC = () => {
     // Fallback to legacy round number
     if (game.round === 2) {
       roundState = { round: 2, totalPlayers: game.players.length };
+    } else if (game.round === 3) {
+      roundState = { round: 3 };
     } else {
-      roundState = { round: game.round };
+      // Default to round 1 for any other value
+      roundState = { round: 1 };
     }
   }
 
@@ -166,7 +170,11 @@ const GamePlayPage: React.FC = () => {
       console.log('🎯 Making Round 2 ranking:', { perceivedRank: action.value });
       declareRound2(gameId, playerId, Number(action.value));
     }
-    // TODO: Handle Round 3 actions
+    // Handle Round 3 guess declarations
+    else if (action.type === 'guess' && game.roundPhase === 'round3') {
+      console.log('🎯 Making Round 3 guess:', { guessedRank: action.value });
+      declareRound3(gameId, playerId, String(action.value));
+    }
     else {
       console.log('🎯 Action type not implemented yet:', action.type);
     }
@@ -299,6 +307,17 @@ const GamePlayPage: React.FC = () => {
                         round: action.round,
                         type: 'perceivedRank' as const,
                         value: rank
+                      };
+                    } else if (action.type === 'round3_guess') {
+                      // Extract the guessed rank from content like "I think my card is A (actual: K) - WRONG"
+                      const guessMatch = action.content.match(/I think my card is (\w+)/);
+                      const guess = guessMatch ? guessMatch[1] : action.content;
+                      return {
+                        playerId: action.playerId,
+                        playerName: action.playerName,
+                        round: action.round,
+                        type: 'guess' as const,
+                        value: guess
                       };
                     } else {
                       return {

@@ -1,4 +1,4 @@
-import { Game, Player, GameState, Round1Declaration, Round2Ranking, GameAction } from './types';
+import { Game, Player, GameState, Round1Declaration, Round2Ranking, Round3Guess, GameAction } from './types';
 import { createGame, restartGame, shuffleDeck, createDeck } from './game';
 
 /**
@@ -166,6 +166,7 @@ export class GameSessionManager {
     game.currentTurnPlayerId = game.players[0]?.id;
     game.round1Declarations = [];
     game.round2Rankings = [];
+    game.round3Guesses = [];
     game.actionLog = [];
     
     // Create and shuffle a new deck
@@ -367,6 +368,87 @@ export class GameSessionManager {
     }
 
     console.log(`Round 2 ranking by ${player.name}: ${perceivedRank}${getOrdinalSuffix(perceivedRank)} highest`);
+    console.log(`Turn advanced to: ${game.currentTurnPlayerId}`);
+    console.log(`Round phase: ${game.roundPhase}`);
+
+    return game;
+  }
+
+  /**
+   * Handle a Round 3 guess from a player
+   * @param gameId The game ID
+   * @param playerId The player making the guess
+   * @param guessedRank The rank the player thinks their own card is
+   * @returns The updated game or null if invalid
+   */
+  handleRound3Guess(gameId: string, playerId: string, guessedRank: string): Game | null {
+    const game = this.games.get(gameId);
+    if (!game) return null;
+
+    // Validate game state
+    if (game.gameState !== GameState.PLAYING || game.roundPhase !== 'round3') {
+      return null;
+    }
+
+    // Validate it's the player's turn
+    if (game.currentTurnPlayerId !== playerId) {
+      return null;
+    }
+
+    // Check if player already made a guess in Round 3
+    if (game.round3Guesses.some(g => g.playerId === playerId)) {
+      return null;
+    }
+
+    // Find the player
+    const player = game.players.find(p => p.id === playerId);
+    if (!player || !player.card) return null;
+
+    // Get the actual rank of the player's card
+    const actualRank = player.card.rank;
+    const isCorrect = guessedRank === actualRank;
+
+    // Create the guess
+    const guess: Round3Guess = {
+      playerId,
+      playerName: player.name,
+      guessedRank,
+      actualRank,
+      isCorrect,
+      timestamp: Date.now()
+    };
+
+    // Add to guesses
+    game.round3Guesses.push(guess);
+
+    // Create action log entry
+    const action: GameAction = {
+      id: `action-${Date.now()}-${playerId}`,
+      playerId,
+      playerName: player.name,
+      type: 'round3_guess',
+      content: `I think my card is ${guessedRank} (actual: ${actualRank}) - ${isCorrect ? 'CORRECT' : 'WRONG'}`,
+      timestamp: Date.now(),
+      round: 3
+    };
+
+    game.actionLog.push(action);
+
+    // Advance to next player's turn
+    const currentPlayerIndex = game.players.findIndex(p => p.id === playerId);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % game.players.length;
+    
+    // Check if all players have made their guesses
+    if (game.round3Guesses.length >= game.players.length) {
+      // Round 3 complete, move to revealing phase
+      game.roundPhase = 'revealing';
+      game.currentTurnPlayerId = undefined; // No more turns needed
+    } else {
+      // Set next player's turn
+      game.currentTurnPlayerId = game.players[nextPlayerIndex].id;
+    }
+
+    console.log(`Round 3 guess by ${player.name}: guessed ${guessedRank}, actual ${actualRank} - ${isCorrect ? 'CORRECT' : 'WRONG'}`);
     console.log(`Turn advanced to: ${game.currentTurnPlayerId}`);
     console.log(`Round phase: ${game.roundPhase}`);
 

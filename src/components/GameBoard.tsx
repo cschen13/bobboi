@@ -7,7 +7,7 @@ type Player = {
   card: string; // e.g., 'A', '2', ..., 'K'
 };
 
-type RoundState =
+export type RoundState =
   | { round: 1 }
   | { round: 2; totalPlayers: number }
   | { round: 3 };
