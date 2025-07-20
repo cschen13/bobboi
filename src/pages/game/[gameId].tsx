@@ -105,13 +105,13 @@ const GameLobbyPage: React.FC = () => {
         <meta name="description" content="Bobboi game lobby" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
       <div className="min-h-screen flex flex-col bg-[#f2bf27]">
         {/* Header */}
         <header className="w-full bg-[#f2bf27] py-4 px-4 flex items-center justify-between border-b border-[#651c1d]/10">
           <div className="flex items-center">
-            <span className="text-[#651c1d] font-serif text-2xl font-bold tracking-wide">BOBBOI</span>
+            <span className="text-[#651c1d] text-2xl font-extrabold tracking-wide" style={{ fontFamily: 'Nunito, sans-serif' }}>BOBBOI</span>
           </div>
           <button 
             onClick={() => router.push('/')} 
@@ -127,7 +127,7 @@ const GameLobbyPage: React.FC = () => {
           <div className="w-full max-w-md mx-auto space-y-6">
             {/* Page title */}
             <div className="text-center mb-2">
-              <h2 className="font-serif text-3xl font-bold text-[#651c1d] mb-1">Game Lobby</h2>
+              <h2 className="text-3xl font-extrabold text-[#651c1d] mb-1" style={{ fontFamily: 'Nunito, sans-serif' }}>Game Lobby</h2>
               <p className="text-[#651c1d] text-base">Waiting for friends to join your game</p>
             </div>
             {error && (

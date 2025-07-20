@@ -82,7 +82,7 @@ const JoinPage: React.FC = () => {
         <meta name="description" content="Join a Bobboi game" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
       <div className="min-h-screen flex flex-col bg-[#f2bf27]">
         {/* Header */}
@@ -96,7 +96,7 @@ const JoinPage: React.FC = () => {
                 <circle cx="50" cy="65" r="8" />
               </svg>
             </div>
-            <h1 className="text-[#651c1d] font-serif text-3xl font-bold">BOBBOI</h1>
+            <h1 className="text-[#651c1d] text-3xl font-extrabold" style={{ fontFamily: 'Nunito, sans-serif' }}>BOBBOI</h1>
           </div>
           <button 
             onClick={() => router.push('/')}
@@ -113,7 +113,7 @@ const JoinPage: React.FC = () => {
           <div className="w-full max-w-lg mx-auto">
             {/* Page title */}
             <div className="text-center mb-6">
-              <h2 className="font-serif text-4xl font-bold text-[#651c1d] mb-2">Join Game</h2>
+              <h2 className="text-4xl font-extrabold text-[#651c1d] mb-2" style={{ fontFamily: 'Nunito, sans-serif' }}>Join Game</h2>
               <p className="text-[#651c1d] text-lg">Enter your details to join a game</p>
             </div>
             

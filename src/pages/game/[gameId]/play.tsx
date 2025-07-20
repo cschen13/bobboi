@@ -231,7 +231,7 @@ const GamePlayPage: React.FC = () => {
         <meta name="description" content="Playing Bobboi card game" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
       <div className="min-h-screen flex flex-col bg-[#f2bf27] w-full">
         {/* Header */}
@@ -245,7 +245,7 @@ const GamePlayPage: React.FC = () => {
                 <circle cx="50" cy="65" r="8" />
               </svg>
             </div>
-            <h1 className="text-[#651c1d] font-serif text-3xl font-bold">BOBBOI</h1>
+            <h1 className="text-[#651c1d] text-3xl font-extrabold" style={{ fontFamily: 'Nunito, sans-serif' }}>BOBBOI</h1>
           </div>
           <div className="flex items-center">
             <div className="hidden md:flex items-center mr-6">
