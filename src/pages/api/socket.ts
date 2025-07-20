@@ -25,7 +25,7 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
 
   console.log('Initializing Socket.IO server...');
   
-  // Create a new Socket.IO server instance with proper configuration
+  // Create a new Socket.IO server instance with Vercel-optimized configuration
   const io = new SocketIOServer(res.socket.server, {
     path: '/api/socket',
     addTrailingSlash: false,
@@ -34,8 +34,10 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       methods: ['GET', 'POST'],
       allowedHeaders: ['content-type'],
     },
-    // Explicitly allow WebSocket transport
-    transports: ['polling', 'websocket'],
+    // Force polling for Vercel serverless compatibility
+    transports: ['polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000,
   });
   
   res.socket.server.io = io;
