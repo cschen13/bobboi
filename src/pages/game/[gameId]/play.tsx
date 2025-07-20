@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useSocket } from '../../../hooks/useSocket';
-import { GameState } from '../../../lib/types';
+import { GameState, GameAction } from '../../../lib/types';
 import { getSavedGameSession } from '../../../lib/socketUtils';
 import GameBoard from '../../../components/GameBoard';
 
@@ -11,7 +11,6 @@ const GamePlayPage: React.FC = () => {
   const { gameId: routeGameId } = router.query;
   
   const {
-    socket,
     connected,
     game,
     gameId,
@@ -19,6 +18,7 @@ const GamePlayPage: React.FC = () => {
     error,
     reconnectGame,
     setPlayerIdManually,
+    declareRound1,
   } = useSocket();
   
   // Effect to handle reconnection or redirection
@@ -124,25 +124,46 @@ const GamePlayPage: React.FC = () => {
   });
 
   // Determine current turn player ID
-  const currentTurnPlayerId = game.players[game.turn]?.id || '';
+  const currentTurnPlayerId = game.currentTurnPlayerId || game.players[game.turn]?.id || '';
 
-  // Derive roundState for GameBoard
-  let roundState: any = { round: game.round };
-  if (game.round === 2) {
-    roundState = { round: 2, totalPlayers: game.players.length };
-  } else if (game.round === 1) {
+  // Derive roundState for GameBoard based on game phase
+  let roundState: { round: number; totalPlayers?: number };
+  if (game.roundPhase === 'round1') {
     roundState = { round: 1 };
-  } else if (game.round === 3) {
+  } else if (game.roundPhase === 'round2') {
+    roundState = { round: 2, totalPlayers: game.players.length };
+  } else if (game.roundPhase === 'round3') {
     roundState = { round: 3 };
+  } else {
+    // Fallback to legacy round number
+    if (game.round === 2) {
+      roundState = { round: 2, totalPlayers: game.players.length };
+    } else {
+      roundState = { round: game.round };
+    }
   }
 
-  // Placeholder action log (should be replaced with real data if available)
-  const actionLog: any[] = [];
+  // Use real action log from game state
+  const actionLog: GameAction[] = game.actionLog || [];
 
-  // Placeholder onAction handler
-  const handleAction = (action: any) => {
-    // TODO: Emit action to server via socket
-    console.log('Action submitted:', action);
+  // Handle player actions
+  const handleAction = (action: { type: string; value: boolean | string | number }) => {
+    console.log('🎯 Action submitted:', action);
+    
+    if (!gameId || !playerId) {
+      console.error('Missing gameId or playerId');
+      return;
+    }
+    
+    // Handle Round 1 declarations
+    if (action.type === 'pair' && game.roundPhase === 'round1') {
+      console.log('🎯 Making Round 1 declaration:', { seesPair: action.value });
+      declareRound1(gameId, playerId, action.value);
+    }
+    // TODO: Handle Round 2 and 3 actions
+    else {
+      console.log('🎯 Action type not implemented yet:', action.type);
+    }
   };
 
   return (
@@ -251,9 +272,15 @@ const GamePlayPage: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <GameBoard
                   players={boardPlayers}
-                  currentRound={game.round}
+                  currentRound={game.roundPhase === 'round1' ? 1 : game.roundPhase === 'round2' ? 2 : game.roundPhase === 'round3' ? 3 : game.round}
                   currentTurnPlayerId={currentTurnPlayerId}
-                  actionLog={actionLog}
+                  actionLog={actionLog.map(action => ({
+                    playerId: action.playerId,
+                    playerName: action.playerName,
+                    round: action.round,
+                    type: action.type === 'round1_declaration' ? 'pair' as const : action.type as 'pair' | 'perceivedRank' | 'guess',
+                    value: action.type === 'round1_declaration' ? action.content.includes('see a pair') : action.content
+                  }))}
                   selfPlayerId={playerId || ''}
                   roundState={roundState}
                   onAction={handleAction}

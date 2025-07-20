@@ -89,6 +89,7 @@ export function createGame(playerNames: string[]): Game {
   
   // Set the initial game state based on player count
   const initialGameState = playerNames.length >= 2 ? GameState.PLAYING : GameState.WAITING_FOR_PLAYERS;
+  const initialRoundPhase = initialGameState === GameState.PLAYING ? 'round1' : 'waiting';
   
   // Only deal cards if we're in PLAYING state (2+ players)
   if (initialGameState === GameState.PLAYING) {
@@ -96,8 +97,7 @@ export function createGame(playerNames: string[]): Game {
     for (let i = 0; i < players.length && i < deck.length; i++) {
       const card = deck.shift(); // Take from the top of the deck
       if (card) {
-        // Use type assertion to assign the card
-        (players[i] as any).card = card;
+        players[i].card = card;
       }
     }
   }
@@ -109,7 +109,11 @@ export function createGame(playerNames: string[]): Game {
     deck,
     round: 1,
     turn: 0, // First player starts
-    gameState: initialGameState
+    gameState: initialGameState,
+    currentTurnPlayerId: players.length > 0 ? players[0].id : undefined,
+    round1Declarations: [],
+    actionLog: [],
+    roundPhase: initialRoundPhase as 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete'
   };
   
   return game;
@@ -148,7 +152,11 @@ export function restartGame(game: Game): Game {
     deck,
     round: game.round + 1,
     turn: newStartingPlayerIndex,
-    gameState: GameState.PLAYING
+    gameState: GameState.PLAYING,
+    currentTurnPlayerId: players[newStartingPlayerIndex]?.id,
+    round1Declarations: [],
+    actionLog: [],
+    roundPhase: 'round1'
   };
   
   return newGame;

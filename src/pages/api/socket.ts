@@ -1,7 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io';
 import type { Server as HTTPServer } from 'http';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Game, GameState } from '../../lib/types';
+import { Round1DeclarationPayload } from '../../lib/types';
 import { GameSessionManager } from '../../lib/gameSessionManager';
 import { SocketPlayerMap } from '../../lib/socketUtils';
 
@@ -400,6 +400,48 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       io.to(gameId).emit('game_state_update', updatedGame);
       
       console.log(`Game started: ${gameId}`);
+    });
+    
+    // Handle Round 1 declarations
+    socket.on('declare_round1', ({ gameId, playerId, seesPair }: Round1DeclarationPayload) => {
+      console.log(`Round 1 declaration from ${playerId} in game ${gameId}: ${seesPair ? 'sees pair' : 'no pair'}`);
+      
+      // Validate game exists
+      if (!gameSessionManager.gameExists(gameId)) {
+        socket.emit('error', { message: 'Game not found' });
+        return;
+      }
+      
+      // Validate player is in game and it's their turn
+      const playerInfo = socketPlayerMap.getPlayerInfo(socket.id);
+      if (!playerInfo || playerInfo.playerId !== playerId || playerInfo.gameId !== gameId) {
+        socket.emit('error', { message: 'Invalid player or not your turn' });
+        return;
+      }
+      
+      // Process the declaration
+      const updatedGame = gameSessionManager.handleRound1Declaration(gameId, playerId, seesPair);
+      
+      if (!updatedGame) {
+        socket.emit('error', { message: 'Invalid declaration or not your turn' });
+        return;
+      }
+      
+      // Broadcast the updated game state to all players in the room
+      io.to(gameId).emit('round1_declaration_made', {
+        game: updatedGame,
+        declaration: {
+          playerId,
+          playerName: updatedGame.players.find(p => p.id === playerId)?.name,
+          seesPair,
+          timestamp: Date.now()
+        }
+      });
+      
+      // Also send general game state update
+      io.to(gameId).emit('game_state_update', updatedGame);
+      
+      console.log(`Round 1 declaration processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
     });
   });
   

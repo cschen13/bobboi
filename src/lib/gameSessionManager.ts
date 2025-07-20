@@ -1,4 +1,4 @@
-import { Game, Player, GameState } from './types';
+import { Game, Player, GameState, Round1Declaration, GameAction } from './types';
 import { createGame, restartGame, shuffleDeck, createDeck } from './game';
 
 /**
@@ -161,6 +161,12 @@ export class GameSessionManager {
     // Change state to PLAYING
     game.gameState = GameState.PLAYING;
     
+    // Initialize Round 1 state
+    game.roundPhase = 'round1';
+    game.currentTurnPlayerId = game.players[0]?.id;
+    game.round1Declarations = [];
+    game.actionLog = [];
+    
     // Create and shuffle a new deck
     const deck = shuffleDeck(createDeck());
     game.deck = deck;
@@ -209,5 +215,80 @@ export class GameSessionManager {
    */
   gameExists(gameId: string): boolean {
     return this.games.has(gameId);
+  }
+
+  /**
+   * Handle a Round 1 declaration from a player
+   * @param gameId The game ID
+   * @param playerId The player making the declaration
+   * @param seesPair Whether the player sees a pair
+   * @returns The updated game or null if invalid
+   */
+  handleRound1Declaration(gameId: string, playerId: string, seesPair: boolean): Game | null {
+    const game = this.games.get(gameId);
+    if (!game) return null;
+
+    // Validate game state
+    if (game.gameState !== GameState.PLAYING || game.roundPhase !== 'round1') {
+      return null;
+    }
+
+    // Validate it's the player's turn
+    if (game.currentTurnPlayerId !== playerId) {
+      return null;
+    }
+
+    // Check if player already declared
+    if (game.round1Declarations.some(d => d.playerId === playerId)) {
+      return null;
+    }
+
+    // Find the player
+    const player = game.players.find(p => p.id === playerId);
+    if (!player) return null;
+
+    // Create the declaration
+    const declaration: Round1Declaration = {
+      playerId,
+      playerName: player.name,
+      seesPair,
+      timestamp: Date.now()
+    };
+
+    // Add to declarations
+    game.round1Declarations.push(declaration);
+
+    // Create action log entry
+    const action: GameAction = {
+      id: `action-${Date.now()}-${playerId}`,
+      playerId,
+      playerName: player.name,
+      type: 'round1_declaration',
+      content: seesPair ? 'I see a pair among the other players' : 'I don\'t see any pairs among the other players',
+      timestamp: Date.now(),
+      round: game.round
+    };
+
+    game.actionLog.push(action);
+
+    // Advance to next player's turn
+    const currentPlayerIndex = game.players.findIndex(p => p.id === playerId);
+    const nextPlayerIndex = (currentPlayerIndex + 1) % game.players.length;
+    
+    // Check if all players have declared
+    if (game.round1Declarations.length >= game.players.length) {
+      // Round 1 complete, advance to Round 2
+      game.roundPhase = 'round2';
+      game.currentTurnPlayerId = game.players[0].id; // Start Round 2 with first player
+    } else {
+      // Set next player's turn
+      game.currentTurnPlayerId = game.players[nextPlayerIndex].id;
+    }
+
+    console.log(`Round 1 declaration by ${player.name}: ${seesPair ? 'sees pair' : 'no pair'}`);
+    console.log(`Turn advanced to: ${game.currentTurnPlayerId}`);
+    console.log(`Round phase: ${game.roundPhase}`);
+
+    return game;
   }
 } 

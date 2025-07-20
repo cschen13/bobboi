@@ -17,7 +17,7 @@ type ActionLogEntry = {
   playerName: string;
   round: number;
   type: 'pair' | 'perceivedRank' | 'guess';
-  value: any;
+  value: boolean | string | number;
 };
 
 type GameBoardProps = {
@@ -27,7 +27,7 @@ type GameBoardProps = {
   actionLog: ActionLogEntry[];
   selfPlayerId: string;
   roundState: RoundState;
-  onAction: (action: any) => void; // Replace 'any' with specific action types as needed
+  onAction: (action: { type: string; value: boolean | string | number }) => void;
 };
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -200,7 +200,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
               <div className="space-y-3">
                 {roundState.round === 1 && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-3">Do you see a pair among the other players' cards?</p>
+                    <p className="text-sm text-gray-600 mb-3">Do you see a pair among the other players&apos; cards?</p>
                     {actionUI}
                   </div>
                 )}
@@ -218,7 +218,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
                 )}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Waiting for {players.find(p => p.id === currentTurnPlayerId)?.name}'s turn...</p>
+              <p className="text-gray-500 text-sm">Waiting for {players.find(p => p.id === currentTurnPlayerId)?.name}&apos;s turn...</p>
             )}
           </div>
         </section>

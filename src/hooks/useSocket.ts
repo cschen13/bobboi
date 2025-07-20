@@ -41,6 +41,7 @@ type SocketHookReturn = {
   endGame: (gameId: string) => void;
   reconnectGame: (gameId: string, playerId: string) => void;
   startGame: (gameId: string) => void;
+  declareRound1: (gameId: string, playerId: string, seesPair: boolean) => void;
   getAllGames: () => Promise<{ games: Game[], count: number }>;
   game: Game | null;
   playerId: string | null;
@@ -195,6 +196,13 @@ export const useSocket = (): SocketHookReturn => {
           setGameId(gameData.id);
           setError(null);
         });
+        
+        socketInstance.on('round1_declaration_made', (data: { game: Game, declaration: { playerId: string, playerName: string, seesPair: boolean, timestamp: number } }) => {
+          console.log('Round 1 declaration made:', data);
+          setGame(data.game);
+          setGameId(data.game.id);
+          setError(null);
+        });
 
         // Save socket instance
         setSocket(socketInstance);
@@ -285,6 +293,17 @@ export const useSocket = (): SocketHookReturn => {
       setError('Socket not connected');
     }
   }, [socket, connected]);
+  
+  // Function to make a Round 1 declaration
+  const declareRound1 = useCallback((gameId: string, playerId: string, seesPair: boolean) => {
+    if (socket && connected) {
+      console.log('🎯 useSocket.declareRound1:', { gameId, playerId, seesPair });
+      socket.emit('declare_round1', { gameId, playerId, seesPair });
+    } else {
+      console.log('🎯 useSocket.declareRound1: Socket not connected!', { socket: !!socket, connected });
+      setError('Socket not connected');
+    }
+  }, [socket, connected]);
 
   // Function to get all active games (admin/debug feature)
   const getAllGames = useCallback((): Promise<{ games: Game[], count: number }> => {
@@ -311,6 +330,7 @@ export const useSocket = (): SocketHookReturn => {
     endGame,
     reconnectGame,
     startGame,
+    declareRound1,
     getAllGames,
     game,
     playerId,
