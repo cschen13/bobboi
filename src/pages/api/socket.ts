@@ -543,6 +543,17 @@ const SocketHandler = (req: NextApiRequest, res: SocketIONextApiResponse) => {
       
       console.log(`Round 3 guess processed. Round phase: ${updatedGame.roundPhase}, Current turn: ${updatedGame.currentTurnPlayerId}`);
     });
+    
+    // --- P2P SIGNAL RELAY ---
+    socket.on('p2p-signal', ({ to, from, signal }) => {
+      // Find the target socket by playerId
+      const targetSocketId = socketPlayerMap.getSocketIdByPlayerId(to);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('p2p-signal', { from, signal });
+      } else {
+        socket.emit('error', { message: `Target player ${to} not found for P2P signal` });
+      }
+    });
   });
   
   // Return a response to acknowledge the connection
@@ -556,4 +567,4 @@ export const config = {
   api: {
     bodyParser: false,
   },
-}; 
+};

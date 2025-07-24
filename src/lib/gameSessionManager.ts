@@ -86,10 +86,10 @@ export class GameSessionManager {
     
     // Add player to the game
     game.players.push(newPlayer);
-    
     // Map the player to this game
     this.playerToGameMap.set(newPlayer.id, gameId);
-    
+    // Update timestamp
+    game.updatedAt = Date.now();
     return game;
   }
   
@@ -267,7 +267,8 @@ export class GameSessionManager {
 
     // Add to declarations
     game.round1Declarations.push(declaration);
-
+    // Update timestamp
+    game.updatedAt = Date.now();
     // Create action log entry
     const action: GameAction = {
       id: `action-${Date.now()}-${playerId}`,
@@ -347,7 +348,8 @@ export class GameSessionManager {
 
     // Add to rankings
     game.round2Rankings.push(ranking);
-
+    // Update timestamp
+    game.updatedAt = Date.now();
     // Create action log entry
     const action: GameAction = {
       id: `action-${Date.now()}-${playerId}`,
@@ -428,7 +430,8 @@ export class GameSessionManager {
 
     // Add to guesses
     game.round3Guesses.push(guess);
-
+    // Update timestamp
+    game.updatedAt = Date.now();
     // Create action log entry
     const action: GameAction = {
       id: `action-${Date.now()}-${playerId}`,

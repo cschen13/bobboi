@@ -116,7 +116,8 @@ export function createGame(playerNames: string[]): Game {
     round3Guesses: [],
     actionLog: [],
     roundPhase: initialRoundPhase as 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete',
-    gameResult: undefined
+    gameResult: undefined,
+    updatedAt: Date.now(),
   };
   
   return game;
@@ -164,7 +165,8 @@ export function restartGame(game: Game): Game {
     round3Guesses: [],
     actionLog: [],
     roundPhase: 'round1',
-    gameResult: undefined
+    gameResult: undefined,
+    updatedAt: Date.now(),
   };
   
   return newGame;

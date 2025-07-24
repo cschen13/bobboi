@@ -110,4 +110,16 @@ export class SocketPlayerMap {
   removeMapping(socketId: string): void {
     this.socketToPlayer.delete(socketId);
   }
-} 
+  
+  /**
+   * Get socketId by playerId
+   * @param playerId The player ID
+   * @returns The socketId or undefined if not found
+   */
+  getSocketIdByPlayerId(playerId: string): string | undefined {
+    for (const [socketId, info] of this.socketToPlayer.entries()) {
+      if (info.playerId === playerId) return socketId;
+    }
+    return undefined;
+  }
+}

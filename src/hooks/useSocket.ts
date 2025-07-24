@@ -51,6 +51,8 @@ type SocketHookReturn = {
   error: string | null;
   gameResult: GameResult | null;
   setPlayerIdManually: (playerId: string | null) => void;
+  sendP2PSignal: (targetId: string, signal: any) => void;
+  onP2PSignal: (cb: (fromId: string, signal: any) => void) => void;
 };
 
 export const useSocket = (): SocketHookReturn => {
@@ -63,6 +65,22 @@ export const useSocket = (): SocketHookReturn => {
   const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
+  // --- P2P signaling helpers (must be after state declarations) ---
+  const sendP2PSignal = useCallback((targetId: string, signal: any) => {
+    if (socket && connected && playerId) {
+      socket.emit('p2p-signal', { to: targetId, from: playerId, signal });
+    }
+  }, [socket, connected, playerId]);
+
+  const onP2PSignal = useCallback((cb: (fromId: string, signal: any) => void) => {
+    if (!socket) return;
+    const handler = (data: { from: string, signal: any }) => {
+      cb(data.from, data.signal);
+    };
+    socket.on('p2p-signal', handler);
+    return () => socket.off('p2p-signal', handler);
+  }, [socket]);
+  
   // Initialize socket connection
   useEffect(() => {
     // Don't initialize socket on server-side
@@ -393,5 +411,7 @@ export const useSocket = (): SocketHookReturn => {
     error,
     gameResult,
     setPlayerIdManually: setPlayerId,
+    sendP2PSignal,
+    onP2PSignal,
   };
-}; 
+};
