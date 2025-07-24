@@ -70,6 +70,7 @@ export interface Game {
   actionLog: GameAction[];
   roundPhase: 'waiting' | 'round1' | 'round2' | 'round3' | 'revealing' | 'complete';
   gameResult?: GameResult;
+  updatedAt?: number; // Timestamp for P2P sync
 }
 
 /**

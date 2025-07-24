@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useSocket } from '../../../hooks/useSocket';
+import { useP2P } from '../../../hooks/useP2P';
 import { GameState, GameAction } from '../../../lib/types';
 import { getSavedGameSession } from '../../../lib/socketUtils';
 import GameBoard, { RoundState } from '../../../components/GameBoard';
@@ -24,7 +25,98 @@ const GamePlayPage: React.FC = () => {
     declareRound1,
     declareRound2,
     declareRound3,
+    sendP2PSignal,
+    onP2PSignal,
   } = useSocket();
+  
+  // --- P2P WIRING ---
+  // Find the other player (for 2-player game; for >2, you may want to connect to all others or a host)
+  const otherPlayer = game?.players.find(p => p.id !== playerId);
+  const otherPlayerId = otherPlayer?.id;
+  // Decide initiator: first player in list is initiator
+  const isInitiator = game?.players[0]?.id === playerId;
+  const { signal, lastSignal, onData, send, isConnected: p2pConnected } = useP2P(isInitiator);
+
+  // Relay our signal to the other player
+  React.useEffect(() => {
+    if (lastSignal && otherPlayerId) {
+      sendP2PSignal(otherPlayerId, lastSignal);
+    }
+  }, [lastSignal, otherPlayerId, sendP2PSignal]);
+
+  // Listen for remote signals and pass to P2P
+  React.useEffect(() => {
+    const unsubscribe = onP2PSignal((fromId, signalData) => {
+      if (fromId === otherPlayerId) {
+        signal(signalData);
+      }
+    });
+    return unsubscribe;
+  }, [onP2PSignal, otherPlayerId, signal]);
+
+  // Send game state over P2P after every change
+  React.useEffect(() => {
+    if (p2pConnected && game) {
+      send({ type: 'game-state', game });
+    }
+    // Only send when game changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game, p2pConnected]);
+
+  // Handle player actions
+  const handleAction = (action: { type: string; value: boolean | string | number }) => {
+    console.log('🎯 Action submitted:', action);
+
+    if (!gameId || !playerId) {
+      console.error('Missing gameId or playerId');
+      return;
+    }
+
+    // Send the action over P2P if connected
+    if (p2pConnected) {
+      send({ type: 'game-move', action });
+    }
+
+    // Optionally, still call the server-side action for fallback or sync
+    // Handle Round 1 declarations
+    if (game && action.type === 'pair' && game.roundPhase === 'round1') {
+      console.log('🎯 Making Round 1 declaration:', { seesPair: action.value });
+      declareRound1(gameId, playerId, action.value as boolean);
+    }
+    // Handle Round 2 ranking declarations
+    else if (game && action.type === 'perceivedRank' && game.roundPhase === 'round2') {
+      console.log('🎯 Making Round 2 ranking:', { perceivedRank: action.value });
+      declareRound2(gameId, playerId, Number(action.value));
+    }
+    // Handle Round 3 guess declarations
+    else if (game && action.type === 'guess' && game.roundPhase === 'round3') {
+      console.log('🎯 Making Round 3 guess:', { guessedRank: action.value });
+      declareRound3(gameId, playerId, String(action.value));
+    }
+    else {
+      console.log('🎯 Action type not implemented yet:', action.type);
+    }
+  };
+
+  // Handle incoming P2P data (game moves and state)
+  React.useEffect(() => {
+    onData((data) => {
+      if (data?.type === 'game-move' && data.action) {
+        // You can process the move here, e.g., update local state or call the same action handler
+        console.log('Received game move from peer:', data.action);
+        // Optionally, call handleAction(data.action) or a separate handler
+      } else if (data?.type === 'game-state' && data.game) {
+        // Only update if the incoming state is newer
+        if (!game || (data.game.updatedAt && (!game.updatedAt || data.game.updatedAt > game.updatedAt))) {
+          // setGame(data.game); // Uncomment if you manage game state locally
+          // For now, just log for demonstration
+          console.log('Received newer game state from peer:', data.game);
+        }
+      } else {
+        console.log('Received from peer:', data);
+      }
+    });
+  }, [onData, game]);
   
   // Effect to handle reconnection or redirection
   useEffect(() => {
@@ -181,35 +273,6 @@ const GamePlayPage: React.FC = () => {
 
   // Use real action log from game state
   const actionLog: GameAction[] = game.actionLog || [];
-
-  // Handle player actions
-  const handleAction = (action: { type: string; value: boolean | string | number }) => {
-    console.log('🎯 Action submitted:', action);
-    
-    if (!gameId || !playerId) {
-      console.error('Missing gameId or playerId');
-      return;
-    }
-    
-    // Handle Round 1 declarations
-    if (action.type === 'pair' && game.roundPhase === 'round1') {
-      console.log('🎯 Making Round 1 declaration:', { seesPair: action.value });
-      declareRound1(gameId, playerId, action.value as boolean);
-    }
-    // Handle Round 2 ranking declarations
-    else if (action.type === 'perceivedRank' && game.roundPhase === 'round2') {
-      console.log('🎯 Making Round 2 ranking:', { perceivedRank: action.value });
-      declareRound2(gameId, playerId, Number(action.value));
-    }
-    // Handle Round 3 guess declarations
-    else if (action.type === 'guess' && game.roundPhase === 'round3') {
-      console.log('🎯 Making Round 3 guess:', { guessedRank: action.value });
-      declareRound3(gameId, playerId, String(action.value));
-    }
-    else {
-      console.log('🎯 Action type not implemented yet:', action.type);
-    }
-  };
 
   // Handle Play Again
   const handlePlayAgain = () => {
@@ -389,4 +452,4 @@ const GamePlayPage: React.FC = () => {
   );
 };
 
-export default GamePlayPage; 
+export default GamePlayPage;
